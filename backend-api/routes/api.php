@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BalanceController;
 use App\Http\Controllers\Api\BillController;
 use App\Http\Controllers\Api\BillItemController;
+use App\Http\Controllers\Api\BuddyController;
 use App\Http\Controllers\Api\GroupController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\SettlementController;
@@ -26,6 +27,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users/{id}', [UserController::class, 'show']);
     Route::put('/users/{id}', [UserController::class, 'update']);
     Route::get('/users/{id}/balances', [BalanceController::class, 'userBalances']);
+
+    // Buddies
+    Route::get('/buddies', [BuddyController::class, 'index']);
+    Route::post('/buddies', [BuddyController::class, 'store']);
+    Route::delete('/buddies/{id}', [BuddyController::class, 'destroy']);
 
     // Groups
     Route::get('/groups', [GroupController::class, 'index']);

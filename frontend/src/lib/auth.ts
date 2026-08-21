@@ -4,6 +4,7 @@ import { api, clearStoredToken, getStoredToken, setStoredToken } from './api'
 export type User = {
   id: number
   name: string
+  username: string
   email: string
   phone: string | null
   created_at: string

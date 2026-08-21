@@ -7,6 +7,7 @@ const navLinks = [
   { to: '/', label: 'Dashboard' },
   { to: '/groups', label: 'Groups' },
   { to: '/bills', label: 'Bills' },
+  { to: '/buddies', label: 'Buddies' },
 ] as const
 
 export function Navbar() {
@@ -30,7 +31,9 @@ export function Navbar() {
     <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/80 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
         <div className="flex items-center gap-8">
-          <span className="text-lg font-semibold text-slate-900">SplitBuddy</span>
+          <Link to="/" className="text-lg font-semibold text-slate-900">
+            SplitBuddy
+          </Link>
           <nav className="hidden items-center gap-6 md:flex">
             {navLinks.map((link) => (
               <Link key={link.to} to={link.to} className={linkClass} activeOptions={{ exact: link.to === '/' }}>

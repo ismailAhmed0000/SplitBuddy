@@ -15,6 +15,7 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedBillsIndexRouteImport } from './routes/_authenticated/bills/index'
 import { Route as AuthenticatedBillsBillIdRouteImport } from './routes/_authenticated/bills/$billId'
+import { Route as AuthenticatedBuddiesIndexRouteImport } from './routes/_authenticated/buddies/index'
 import { Route as AuthenticatedGroupsIndexRouteImport } from './routes/_authenticated/groups/index'
 import { Route as AuthenticatedGroupsGroupIdRouteImport } from './routes/_authenticated/groups/$groupId'
 
@@ -48,6 +49,12 @@ const AuthenticatedBillsBillIdRoute =
     path: '/bills/$billId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedBuddiesIndexRoute =
+  AuthenticatedBuddiesIndexRouteImport.update({
+    id: '/buddies/',
+    path: '/buddies/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedGroupsIndexRoute =
   AuthenticatedGroupsIndexRouteImport.update({
     id: '/groups/',
@@ -68,6 +75,7 @@ export interface FileRoutesByFullPath {
   '/bills/$billId': typeof AuthenticatedBillsBillIdRoute
   '/groups/$groupId': typeof AuthenticatedGroupsGroupIdRoute
   '/bills/': typeof AuthenticatedBillsIndexRoute
+  '/buddies/': typeof AuthenticatedBuddiesIndexRoute
   '/groups/': typeof AuthenticatedGroupsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -77,6 +85,7 @@ export interface FileRoutesByTo {
   '/bills/$billId': typeof AuthenticatedBillsBillIdRoute
   '/groups/$groupId': typeof AuthenticatedGroupsGroupIdRoute
   '/bills': typeof AuthenticatedBillsIndexRoute
+  '/buddies': typeof AuthenticatedBuddiesIndexRoute
   '/groups': typeof AuthenticatedGroupsIndexRoute
 }
 export interface FileRoutesById {
@@ -88,6 +97,7 @@ export interface FileRoutesById {
   '/_authenticated/bills/$billId': typeof AuthenticatedBillsBillIdRoute
   '/_authenticated/groups/$groupId': typeof AuthenticatedGroupsGroupIdRoute
   '/_authenticated/bills/': typeof AuthenticatedBillsIndexRoute
+  '/_authenticated/buddies/': typeof AuthenticatedBuddiesIndexRoute
   '/_authenticated/groups/': typeof AuthenticatedGroupsIndexRoute
 }
 export interface FileRouteTypes {
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
     | '/bills/$billId'
     | '/groups/$groupId'
     | '/bills/'
+    | '/buddies/'
     | '/groups/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -108,6 +119,7 @@ export interface FileRouteTypes {
     | '/bills/$billId'
     | '/groups/$groupId'
     | '/bills'
+    | '/buddies'
     | '/groups'
   id:
     | '__root__'
@@ -118,6 +130,7 @@ export interface FileRouteTypes {
     | '/_authenticated/bills/$billId'
     | '/_authenticated/groups/$groupId'
     | '/_authenticated/bills/'
+    | '/_authenticated/buddies/'
     | '/_authenticated/groups/'
   fileRoutesById: FileRoutesById
 }
@@ -171,6 +184,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBillsBillIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/buddies/': {
+      id: '/_authenticated/buddies/'
+      path: '/buddies'
+      fullPath: '/buddies/'
+      preLoaderRoute: typeof AuthenticatedBuddiesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/groups/': {
       id: '/_authenticated/groups/'
       path: '/groups'
@@ -193,6 +213,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedBillsBillIdRoute: typeof AuthenticatedBillsBillIdRoute
   AuthenticatedGroupsGroupIdRoute: typeof AuthenticatedGroupsGroupIdRoute
   AuthenticatedBillsIndexRoute: typeof AuthenticatedBillsIndexRoute
+  AuthenticatedBuddiesIndexRoute: typeof AuthenticatedBuddiesIndexRoute
   AuthenticatedGroupsIndexRoute: typeof AuthenticatedGroupsIndexRoute
 }
 
@@ -201,6 +222,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedBillsBillIdRoute: AuthenticatedBillsBillIdRoute,
   AuthenticatedGroupsGroupIdRoute: AuthenticatedGroupsGroupIdRoute,
   AuthenticatedBillsIndexRoute: AuthenticatedBillsIndexRoute,
+  AuthenticatedBuddiesIndexRoute: AuthenticatedBuddiesIndexRoute,
   AuthenticatedGroupsIndexRoute: AuthenticatedGroupsIndexRoute,
 }
 

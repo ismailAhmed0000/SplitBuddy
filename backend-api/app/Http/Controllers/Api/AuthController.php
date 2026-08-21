@@ -23,6 +23,7 @@ class AuthController extends Controller
     {
         $user = User::create([
             'name' => $request->validated('name'),
+            'username' => $this->generateUsername($request->validated('name')),
             'email' => $request->validated('email'),
             'phone' => $request->validated('phone'),
             'password' => $request->validated('password'),
@@ -92,5 +93,19 @@ class AuthController extends Controller
         return $status === Password::PASSWORD_RESET
             ? response()->json(['message' => __($status)])
             : response()->json(['message' => __($status)], 422);
+    }
+
+    private function generateUsername(string $name): string
+    {
+        $base = Str::slug($name, '_') ?: 'user';
+        $username = $base;
+        $suffix = 0;
+
+        while (User::where('username', $username)->exists()) {
+            $suffix++;
+            $username = $base.'_'.$suffix;
+        }
+
+        return $username;
     }
 }

@@ -39,7 +39,8 @@ class UserController extends Controller
             ->where(function ($query) use ($request) {
                 $term = '%'.$request->string('q').'%';
                 $query->where('name', 'like', $term)
-                    ->orWhere('email', 'like', $term);
+                    ->orWhere('email', 'like', $term)
+                    ->orWhere('username', 'like', $term);
             })
             ->limit(20)
             ->get();

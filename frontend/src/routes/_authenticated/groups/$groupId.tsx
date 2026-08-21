@@ -11,6 +11,7 @@ import {
   useUpdateGroup,
 } from '@/lib/groups'
 import { useBills } from '@/lib/bills'
+import { useBuddies } from '@/lib/buddies'
 import { useCreateSettlement, useSettlements } from '@/lib/settlements'
 import { money } from '@/lib/format'
 
@@ -141,11 +142,29 @@ function BuddiesSection({
   onRemove: (memberId: number, name: string) => void
 }) {
   const addMember = useAddGroupMember(groupId)
+  const { data: myBuddies } = useBuddies()
   const [query, setQuery] = useState('')
   const [isFocused, setIsFocused] = useState(false)
   const { data: searchResults } = useSearchUsers(query.trim().length >= 2 ? query : '')
 
   const existingUserIds = useMemo(() => new Set(members.map((m) => m.user_id).filter(Boolean)), [members])
+
+  const matchingBuddies = useMemo(() => {
+    const term = query.trim().toLowerCase()
+    return (myBuddies ?? [])
+      .filter((b) => !existingUserIds.has(b.buddy_user_id))
+      .filter(
+        (b) => !term || b.user.name.toLowerCase().includes(term) || b.user.username.toLowerCase().includes(term),
+      )
+  }, [myBuddies, existingUserIds, query])
+
+  const otherResults = useMemo(
+    () =>
+      (searchResults ?? []).filter(
+        (u) => !existingUserIds.has(u.id) && !matchingBuddies.some((b) => b.buddy_user_id === u.id),
+      ),
+    [searchResults, existingUserIds, matchingBuddies],
+  )
 
   function addByName(memberName: string) {
     addMember.mutate({ name: memberName })
@@ -186,28 +205,52 @@ function BuddiesSection({
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          placeholder="Search a name/email, or type a buddy's name"
+          placeholder="Search your buddies, or type a name to add"
           className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none placeholder:text-slate-400 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/50"
         />
 
         {isFocused && query.trim() && (
           <div
             onMouseDown={(e) => e.preventDefault()}
-            className="absolute z-10 mt-1 w-full rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+            className="absolute z-10 w-full rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
           >
-            {searchResults
-              ?.filter((u) => !existingUserIds.has(u.id))
-              .map((u) => (
-                <button
-                  key={u.id}
-                  type="button"
-                  onClick={() => addByUser(u)}
-                  className="flex w-full flex-col px-3 py-2 text-left text-sm hover:bg-slate-50"
-                >
-                  <span className="font-medium text-slate-900">{u.name}</span>
-                  <span className="text-xs text-slate-500">{u.email}</span>
-                </button>
-              ))}
+            {matchingBuddies.length > 0 && (
+              <>
+                <p className="px-3 pt-1 text-[11px] font-medium tracking-wide text-slate-400 uppercase">
+                  Your buddies
+                </p>
+                {matchingBuddies.map((b) => (
+                  <button
+                    key={b.buddy_user_id}
+                    type="button"
+                    onClick={() => addByUser({ id: b.buddy_user_id, name: b.user.name })}
+                    className="flex w-full flex-col px-3 py-2 text-left text-sm hover:bg-slate-50"
+                  >
+                    <span className="font-medium text-slate-900">{b.user.name}</span>
+                    <span className="text-xs text-slate-500">@{b.user.username}</span>
+                  </button>
+                ))}
+              </>
+            )}
+
+            {otherResults.length > 0 && (
+              <>
+                <p className="px-3 pt-1 text-[11px] font-medium tracking-wide text-slate-400 uppercase">
+                  Other users
+                </p>
+                {otherResults.map((u) => (
+                  <button
+                    key={u.id}
+                    type="button"
+                    onClick={() => addByUser(u)}
+                    className="flex w-full flex-col px-3 py-2 text-left text-sm hover:bg-slate-50"
+                  >
+                    <span className="font-medium text-slate-900">{u.name}</span>
+                    <span className="text-xs text-slate-500">{u.email}</span>
+                  </button>
+                ))}
+              </>
+            )}
             <button
               type="button"
               onClick={() => addByName(query.trim())}
