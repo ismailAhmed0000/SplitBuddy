@@ -21,6 +21,7 @@ class BillItem extends Model
             'quantity' => 'decimal:2',
             'unit_price' => 'decimal:2',
             'total_price' => 'decimal:2',
+            'final_price' => 'decimal:2',
         ];
     }
 

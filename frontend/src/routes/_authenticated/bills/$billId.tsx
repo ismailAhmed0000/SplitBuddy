@@ -1,0 +1,228 @@
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
+import { ItemAssignmentRow } from '@/components/ItemAssignmentRow'
+import { money } from '@/lib/format'
+import { useBill, useConfirmBill, useRetryExtraction } from '@/lib/bills'
+import { useAddGroupMember, useGroup } from '@/lib/groups'
+
+export const Route = createFileRoute('/_authenticated/bills/$billId')({
+  component: BillReviewPage,
+})
+
+function BillReviewPage() {
+  const { billId } = Route.useParams()
+  const id = Number(billId)
+
+  const { data: bill, isLoading } = useBill(id)
+  const { data: group } = useGroup(bill?.group_id)
+  const retryExtraction = useRetryExtraction(id)
+  const confirmBill = useConfirmBill(id)
+  const addMember = useAddGroupMember(bill?.group_id)
+
+  const [newMemberName, setNewMemberName] = useState('')
+
+  function handleAddMember() {
+    if (!newMemberName.trim()) return
+    addMember.mutate({ name: newMemberName.trim() }, {
+      onSuccess: () => setNewMemberName(''),
+    })
+  }
+
+  if (isLoading || !bill) {
+    return (
+      <main className="mx-auto max-w-3xl px-4 py-8">
+        <p className="text-sm text-slate-500">Loading…</p>
+      </main>
+    )
+  }
+
+  return (
+    <main className="mx-auto max-w-3xl px-4 py-8">
+      <Link to="/" className="text-sm font-medium text-violet-600 hover:text-violet-700">
+        ← Back to dashboard
+      </Link>
+
+      <div className="mt-3 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-slate-900">
+            {bill.merchant_name ?? 'Receipt'}
+          </h1>
+          {bill.bill_date && <p className="mt-1 text-sm text-slate-500">{bill.bill_date}</p>}
+        </div>
+        <StatusBadge status={bill.status} />
+      </div>
+
+      {bill.image_url && <ReceiptImage url={bill.image_url} />}
+
+      {bill.status === 'processing' && (
+        <div className="mt-6 flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white p-10 text-center shadow-sm">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-200 border-t-violet-600" />
+          <p className="text-sm font-medium text-slate-700">Reading your receipt…</p>
+          <p className="text-sm text-slate-500">This usually takes a few seconds.</p>
+        </div>
+      )}
+
+      {bill.status === 'failed' && (
+        <div className="mt-6 flex flex-col items-center gap-3 rounded-2xl border border-red-200 bg-red-50 p-10 text-center">
+          <p className="text-sm font-medium text-red-700">We couldn't read this receipt.</p>
+          <p className="text-sm text-red-600">Try a clearer photo, or retry with the same image.</p>
+          <button
+            type="button"
+            onClick={() => retryExtraction.mutate()}
+            disabled={retryExtraction.isPending}
+            className="mt-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {retryExtraction.isPending ? 'Retrying…' : 'Retry extraction'}
+          </button>
+        </div>
+      )}
+
+      {(bill.status === 'parsed' || bill.status === 'confirmed') && (
+        <>
+          <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <dl className="grid grid-cols-2 gap-y-2 text-sm sm:grid-cols-4">
+              <SummaryField label="Subtotal" value={money(bill.subtotal)} />
+              <SummaryField label={bill.tax_label ?? 'Tax'} value={money(bill.tax_amount)} />
+              <SummaryField label="Discount" value={bill.discount_amount ? `-${money(bill.discount_amount)}` : money(0)} />
+              <SummaryField label="Service" value={money(bill.service_charge)} />
+              <SummaryField label="Tip" value={money(bill.tip_amount)} />
+              <SummaryField label="Total" value={money(bill.total)} emphasize />
+            </dl>
+            <p className="mt-4 border-t border-slate-100 pt-3 text-xs text-slate-500">
+              Tax, discount, service, and tip are already folded into each item's price below —
+              splitting an item splits its full share of all of these too.
+            </p>
+          </div>
+
+          {bill.status === 'parsed' && (
+            <div className="mt-6 flex items-center justify-between rounded-2xl border border-amber-200 bg-amber-50 p-4">
+              <p className="text-sm text-amber-800">
+                Assign items below, then confirm so this bill counts toward balances.
+              </p>
+              <button
+                type="button"
+                onClick={() => confirmBill.mutate()}
+                disabled={confirmBill.isPending}
+                className="shrink-0 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {confirmBill.isPending ? 'Confirming…' : 'Confirm bill'}
+              </button>
+            </div>
+          )}
+
+          <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-slate-900">Buddies</h2>
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              {group?.members.map((member) => (
+                <span
+                  key={member.id}
+                  className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700"
+                >
+                  {member.name}
+                </span>
+              ))}
+              <div className="flex items-center gap-1.5">
+                <input
+                  type="text"
+                  value={newMemberName}
+                  onChange={(e) => setNewMemberName(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAddMember()}
+                  placeholder="Add a buddy not on the app"
+                  className="rounded-full border border-dashed border-slate-300 px-3 py-1 text-xs outline-none placeholder:text-slate-400 focus:border-violet-500"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddMember}
+                  disabled={addMember.isPending || !newMemberName.trim()}
+                  className="rounded-full bg-violet-600 px-3 py-1 text-xs font-medium text-white transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Add
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 flex flex-col gap-3">
+            <h2 className="text-sm font-semibold text-slate-900">Items — tap a buddy to split</h2>
+            {bill.items.map((item) => (
+              <ItemAssignmentRow key={item.id} billId={bill.id} item={item} members={group?.members ?? []} />
+            ))}
+          </div>
+        </>
+      )}
+    </main>
+  )
+}
+
+function ReceiptImage({ url }: { url: string }) {
+  const [isOpen, setIsOpen] = useState(false)
+
+  useEffect(() => {
+    if (!isOpen) return
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') setIsOpen(false)
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen])
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setIsOpen(true)}
+        className="mt-6 block w-full overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm"
+      >
+        <img src={url} alt="Uploaded receipt" className="mx-auto max-h-72 w-full object-contain" />
+        <span className="block border-t border-slate-200 bg-white px-4 py-2 text-center text-xs font-medium text-slate-500">
+          Tap to view full size
+        </span>
+      </button>
+
+      {isOpen && (
+        <div
+          onClick={() => setIsOpen(false)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+        >
+          <img src={url} alt="Uploaded receipt, full size" className="max-h-full max-w-full rounded-lg object-contain" />
+          <button
+            type="button"
+            onClick={() => setIsOpen(false)}
+            aria-label="Close"
+            className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
+          >
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
+    </>
+  )
+}
+
+function SummaryField({ label, value, emphasize }: { label: string; value: string; emphasize?: boolean }) {
+  return (
+    <div>
+      <dt className="text-xs text-slate-500">{label}</dt>
+      <dd className={emphasize ? 'font-semibold text-slate-900' : 'text-slate-700'}>{value}</dd>
+    </div>
+  )
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const styles: Record<string, string> = {
+    processing: 'bg-amber-100 text-amber-700',
+    parsed: 'bg-blue-100 text-blue-700',
+    confirmed: 'bg-emerald-100 text-emerald-700',
+    failed: 'bg-red-100 text-red-700',
+  }
+
+  return (
+    <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${styles[status] ?? 'bg-slate-100 text-slate-700'}`}>
+      {status}
+    </span>
+  )
+}

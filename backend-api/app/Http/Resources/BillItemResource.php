@@ -21,6 +21,7 @@ class BillItemResource extends JsonResource
             'quantity' => $this->quantity,
             'unit_price' => $this->unit_price,
             'total_price' => $this->total_price,
+            'final_price' => $this->final_price,
             'assignments' => AssignmentResource::collection($this->whenLoaded('assignments')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

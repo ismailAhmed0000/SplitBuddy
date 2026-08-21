@@ -8,8 +8,14 @@ use App\Http\Requests\UpdateBillRequest;
 use App\Http\Resources\BillResource;
 use App\Models\Bill;
 use App\Models\Group;
+use App\Services\BillExtractionService;
+use App\Services\BillItemPriceCalculator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Throwable;
 
 class BillController extends Controller
 {
@@ -34,12 +40,77 @@ class BillController extends Controller
 
         $this->authorizeMembership($group, $request->user()->id);
 
+        $file = $request->file('image');
+        $path = $file->store('bills', 'public');
+
         $bill = Bill::create([
-            ...$request->validated(),
+            'group_id' => $group->id,
             'uploaded_by' => $request->user()->id,
+            'image_url' => Storage::disk('public')->url($path),
+            'status' => 'processing',
         ])->refresh();
 
-        return response()->json(['data' => new BillResource($bill->load('uploader'))], 201);
+        $this->runExtraction($bill, $file->getRealPath(), $file->getMimeType());
+
+        return response()->json([
+            'data' => new BillResource($bill->fresh(['uploader', 'items.assignments'])),
+        ], 201);
+    }
+
+    public function extract(Request $request, int $id): BillResource
+    {
+        $bill = Bill::with('group')->findOrFail($id);
+
+        $this->authorizeMembership($bill->group, $request->user()->id);
+
+        abort_unless($bill->image_url, 422, 'This bill has no image to extract from.');
+
+        $disk = Storage::disk('public');
+        $path = Str::after($bill->image_url, '/storage/');
+
+        abort_unless($disk->exists($path), 404, 'The receipt image could not be found.');
+
+        $bill->items()->delete();
+        $bill->update(['status' => 'processing']);
+
+        $this->runExtraction($bill, $disk->path($path), $disk->mimeType($path));
+
+        return new BillResource($bill->fresh(['uploader', 'items.assignments']));
+    }
+
+    private function runExtraction(Bill $bill, string $imagePath, string $mediaType): void
+    {
+        try {
+            $data = app(BillExtractionService::class)->extract($imagePath, $mediaType);
+
+            $bill->update([
+                'merchant_name' => $data['merchant_name'],
+                'bill_date' => $data['bill_date'],
+                'subtotal' => $data['subtotal'],
+                'tax_amount' => $data['tax_amount'],
+                'tax_label' => $data['tax_label'],
+                'discount_amount' => $data['discount_amount'],
+                'discount_type' => $data['discount_type'],
+                'service_charge' => $data['service_charge'],
+                'tip_amount' => $data['tip_amount'],
+                'total' => $data['total'],
+                'status' => 'parsed',
+            ]);
+
+            foreach ($data['items'] as $item) {
+                $bill->items()->create([
+                    'name' => $item['name'],
+                    'quantity' => $item['quantity'],
+                    'unit_price' => $item['unit_price'],
+                    'total_price' => $item['total_price'],
+                ]);
+            }
+
+            app(BillItemPriceCalculator::class)->recalculate($bill);
+        } catch (Throwable $e) {
+            Log::error('Bill extraction failed', ['bill_id' => $bill->id, 'error' => $e->getMessage()]);
+            $bill->update(['status' => 'failed']);
+        }
     }
 
     public function show(Request $request, int $id): BillResource
@@ -58,8 +129,9 @@ class BillController extends Controller
         $this->authorizeMembership($bill->group, $request->user()->id);
 
         $bill->update($request->validated());
+        app(BillItemPriceCalculator::class)->recalculate($bill);
 
-        return new BillResource($bill->load('uploader', 'items.assignments'));
+        return new BillResource($bill->fresh(['uploader', 'items.assignments']));
     }
 
     public function destroy(Request $request, int $id): JsonResponse

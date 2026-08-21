@@ -44,6 +44,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/bills/{id}', [BillController::class, 'update']);
     Route::delete('/bills/{id}', [BillController::class, 'destroy']);
     Route::get('/bills/{id}/status', [BillController::class, 'status']);
+    Route::post('/bills/{id}/extract', [BillController::class, 'extract']);
 
     // Bill Items
     Route::get('/bills/{id}/items', [BillItemController::class, 'index']);

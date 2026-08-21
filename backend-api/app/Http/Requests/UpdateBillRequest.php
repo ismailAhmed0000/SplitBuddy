@@ -34,8 +34,6 @@ class UpdateBillRequest extends FormRequest
             'service_charge' => ['sometimes', 'nullable', 'numeric', 'min:0'],
             'tip_amount' => ['sometimes', 'nullable', 'numeric', 'min:0'],
             'total' => ['sometimes', 'nullable', 'numeric', 'min:0'],
-            'tax_split_method' => ['sometimes', 'nullable', 'string', 'in:proportional,even'],
-            'discount_split_method' => ['sometimes', 'nullable', 'string', 'in:proportional,even'],
             'status' => ['sometimes', 'required', 'string', 'in:processing,parsed,confirmed,failed'],
         ];
     }

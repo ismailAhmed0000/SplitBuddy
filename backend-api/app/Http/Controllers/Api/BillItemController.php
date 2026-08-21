@@ -9,6 +9,7 @@ use App\Http\Resources\BillItemResource;
 use App\Models\Bill;
 use App\Models\BillItem;
 use App\Models\Group;
+use App\Services\BillItemPriceCalculator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -36,8 +37,9 @@ class BillItemController extends Controller
         $data['total_price'] ??= $data['quantity'] * $data['unit_price'];
 
         $item = $bill->items()->create($data);
+        app(BillItemPriceCalculator::class)->recalculate($bill);
 
-        return response()->json(['data' => new BillItemResource($item)], 201);
+        return response()->json(['data' => new BillItemResource($item->fresh())], 201);
     }
 
     public function update(UpdateBillItemRequest $request, int $id): BillItemResource
@@ -47,8 +49,9 @@ class BillItemController extends Controller
         $this->authorizeMembership($item->bill->group, $request->user()->id);
 
         $item->update($request->validated());
+        app(BillItemPriceCalculator::class)->recalculate($item->bill);
 
-        return new BillItemResource($item->load('assignments'));
+        return new BillItemResource($item->fresh(['assignments']));
     }
 
     public function destroy(Request $request, int $id): JsonResponse
@@ -57,7 +60,9 @@ class BillItemController extends Controller
 
         $this->authorizeMembership($item->bill->group, $request->user()->id);
 
+        $bill = $item->bill;
         $item->delete();
+        app(BillItemPriceCalculator::class)->recalculate($bill);
 
         return response()->json(status: 204);
     }

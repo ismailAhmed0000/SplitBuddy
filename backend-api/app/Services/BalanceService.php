@@ -35,8 +35,10 @@ class BalanceService
                 continue;
             }
 
+            // Each item's final_price already has its share of tax, discount,
+            // service charge, and tip folded in (see BillItemPriceCalculator),
+            // so splitting it among its assignees is all that's needed here.
             $memberOwed = [];
-            $subtotalSum = 0.0;
 
             foreach ($bill->items as $item) {
                 $assignments = $item->assignments;
@@ -45,7 +47,7 @@ class BalanceService
                     continue;
                 }
 
-                $itemTotal = (float) $item->total_price;
+                $itemTotal = (float) ($item->final_price ?? $item->total_price);
 
                 foreach ($assignments as $assignment) {
                     $share = match ($assignment->share_type) {
@@ -55,35 +57,10 @@ class BalanceService
                     };
 
                     $memberOwed[$assignment->group_member_id] = ($memberOwed[$assignment->group_member_id] ?? 0.0) + $share;
-                    $subtotalSum += $share;
                 }
             }
 
-            if ($subtotalSum <= 0.0) {
-                continue;
-            }
-
-            $charges = (float) $bill->tax_amount + (float) $bill->service_charge + (float) $bill->tip_amount;
-            $discount = $bill->discount_type === 'percentage'
-                ? $subtotalSum * ((float) $bill->discount_amount / 100)
-                : (float) $bill->discount_amount;
-
-            $participantIds = array_keys($memberOwed);
-            $participantCount = count($participantIds);
-
-            foreach ($participantIds as $memberId) {
-                $shareRatio = $memberOwed[$memberId] / $subtotalSum;
-
-                $chargeShare = $bill->tax_split_method === 'even'
-                    ? $charges / $participantCount
-                    : $charges * $shareRatio;
-
-                $discountShare = $bill->discount_split_method === 'even'
-                    ? $discount / $participantCount
-                    : $discount * $shareRatio;
-
-                $total = $memberOwed[$memberId] + $chargeShare - $discountShare;
-
+            foreach ($memberOwed as $memberId => $total) {
                 $balances[$memberId] = ($balances[$memberId] ?? 0.0) - $total;
                 $balances[$payer->id] = ($balances[$payer->id] ?? 0.0) + $total;
             }

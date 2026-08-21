@@ -29,8 +29,6 @@ class BillResource extends JsonResource
             'service_charge' => $this->service_charge,
             'tip_amount' => $this->tip_amount,
             'total' => $this->total,
-            'tax_split_method' => $this->tax_split_method,
-            'discount_split_method' => $this->discount_split_method,
             'status' => $this->status,
             'uploader' => new UserResource($this->whenLoaded('uploader')),
             'items' => BillItemResource::collection($this->whenLoaded('items')),

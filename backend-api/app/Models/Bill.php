@@ -21,8 +21,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'service_charge',
     'tip_amount',
     'total',
-    'tax_split_method',
-    'discount_split_method',
     'status',
 ])]
 class Bill extends Model
