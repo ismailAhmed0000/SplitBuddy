@@ -2,12 +2,26 @@
 
 namespace App\Services;
 
+use App\Models\Assignment;
 use App\Models\Group;
+use App\Models\GroupMember;
 use App\Models\User;
 use Illuminate\Support\Collection;
 
 class BalanceService
 {
+    /**
+     * The amount of an item's total a single assignment is responsible for.
+     */
+    public function shareOf(Assignment $assignment, float $itemTotal, int $assignmentCount): float
+    {
+        return match ($assignment->share_type) {
+            'equal' => $itemTotal / $assignmentCount,
+            'percentage' => $itemTotal * ((float) $assignment->share_value / 100),
+            'exact_amount' => (float) $assignment->share_value,
+        };
+    }
+
     /**
      * Net balance per group member: positive means the group owes them
      * money, negative means they owe the group money.
@@ -50,11 +64,7 @@ class BalanceService
                 $itemTotal = (float) ($item->final_price ?? $item->total_price);
 
                 foreach ($assignments as $assignment) {
-                    $share = match ($assignment->share_type) {
-                        'equal' => $itemTotal / $assignments->count(),
-                        'percentage' => $itemTotal * ((float) $assignment->share_value / 100),
-                        'exact_amount' => (float) $assignment->share_value,
-                    };
+                    $share = $this->shareOf($assignment, $itemTotal, $assignments->count());
 
                     $memberOwed[$assignment->group_member_id] = ($memberOwed[$assignment->group_member_id] ?? 0.0) + $share;
                 }
@@ -78,6 +88,51 @@ class BalanceService
             'name' => $member->name,
             'balance' => round($balances[$member->id] ?? 0.0, 2),
         ])->values();
+    }
+
+    /**
+     * Every bill in the group where this member has at least one item
+     * assignment, with what they were assigned and their share of each.
+     *
+     * @return Collection<int, array<string, mixed>>
+     */
+    public function billsForMember(Group $group, GroupMember $member): Collection
+    {
+        $bills = $group->bills()->with('items.assignments')->latest()->get();
+
+        return $bills
+            ->map(function ($bill) use ($member) {
+                $items = $bill->items->filter(
+                    fn ($item) => $item->assignments->contains('group_member_id', $member->id)
+                );
+
+                if ($items->isEmpty()) {
+                    return null;
+                }
+
+                $assignedItems = $items->map(function ($item) use ($member) {
+                    $assignment = $item->assignments->firstWhere('group_member_id', $member->id);
+                    $itemTotal = (float) ($item->final_price ?? $item->total_price);
+                    $amount = $this->shareOf($assignment, $itemTotal, $item->assignments->count());
+
+                    return [
+                        'id' => $item->id,
+                        'name' => $item->name,
+                        'amount' => round($amount, 2),
+                    ];
+                })->values();
+
+                return [
+                    'id' => $bill->id,
+                    'merchant_name' => $bill->merchant_name,
+                    'bill_date' => $bill->bill_date?->toDateString(),
+                    'status' => $bill->status,
+                    'items' => $assignedItems,
+                    'total' => round($assignedItems->sum('amount'), 2),
+                ];
+            })
+            ->filter()
+            ->values();
     }
 
     /**

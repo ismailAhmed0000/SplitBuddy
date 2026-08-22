@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './api'
 import type { User } from './auth'
+import type { BillStatus } from './bills'
 
 export type GroupMember = {
   id: number
@@ -25,10 +26,29 @@ export type GroupBalance = {
   balance: number
 }
 
+export type GroupMemberBill = {
+  id: number
+  merchant_name: string | null
+  bill_date: string | null
+  status: BillStatus
+  items: { id: number; name: string; amount: number }[]
+  total: number
+}
+
+export type GroupMemberDetail = {
+  id: number
+  group_id: number
+  name: string
+  user: User | null
+  balance: number
+  bills: GroupMemberBill[]
+}
+
 export const groupKeys = {
   list: ['groups'] as const,
   detail: (id: number) => ['groups', id] as const,
   balances: (id: number) => ['groups', id, 'balances'] as const,
+  member: (groupId: number, memberId: number) => ['groups', groupId, 'members', memberId] as const,
 }
 
 async function fetchGroups(): Promise<Group[]> {
@@ -64,6 +84,17 @@ export function useGroupBalances(id: number | undefined) {
       return data.data
     },
     enabled: Boolean(id),
+  })
+}
+
+export function useGroupMember(groupId: number | undefined, memberId: number | undefined) {
+  return useQuery({
+    queryKey: groupKeys.member(groupId ?? 0, memberId ?? 0),
+    queryFn: async () => {
+      const { data } = await api.get<{ data: GroupMemberDetail }>(`/groups/${groupId}/members/${memberId}`)
+      return data.data
+    },
+    enabled: Boolean(groupId) && Boolean(memberId),
   })
 }
 

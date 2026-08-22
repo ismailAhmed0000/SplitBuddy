@@ -32,6 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Buddies
     Route::get('/buddies', [BuddyController::class, 'index']);
     Route::post('/buddies', [BuddyController::class, 'store']);
+    Route::get('/buddies/{id}', [BuddyController::class, 'show']);
     Route::delete('/buddies/{id}', [BuddyController::class, 'destroy']);
 
     // Groups
@@ -41,6 +42,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/groups/{id}', [GroupController::class, 'update']);
     Route::delete('/groups/{id}', [GroupController::class, 'destroy']);
     Route::post('/groups/{id}/members', [GroupController::class, 'addMember']);
+    Route::get('/groups/{id}/members/{memberId}', [GroupController::class, 'showMember']);
     Route::delete('/groups/{id}/members/{memberId}', [GroupController::class, 'removeMember']);
     Route::get('/groups/{id}/balances', [BalanceController::class, 'groupBalances']);
 

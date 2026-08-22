@@ -300,7 +300,12 @@ function BalancesSection({
 
       <div className="mt-3 flex flex-col gap-1.5">
         {balances.map((b) => (
-          <div key={b.group_member_id} className="flex items-center justify-between text-sm">
+          <Link
+            key={b.group_member_id}
+            to="/groups/$groupId/members/$memberId"
+            params={{ groupId: String(groupId), memberId: String(b.group_member_id) }}
+            className="flex items-center justify-between rounded-lg px-2 py-1 text-sm transition hover:bg-slate-50"
+          >
             <span className="text-slate-700">{b.name}</span>
             <span
               className={
@@ -309,7 +314,7 @@ function BalancesSection({
             >
               {b.balance > 0 ? `+${money(b.balance)}` : money(b.balance)}
             </span>
-          </div>
+          </Link>
         ))}
       </div>
 

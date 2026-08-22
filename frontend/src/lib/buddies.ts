@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './api'
 import type { User } from './auth'
+import type { BillStatus } from './bills'
 
 export type Buddy = {
   id: number
@@ -9,8 +10,27 @@ export type Buddy = {
   created_at: string
 }
 
+export type BuddyBill = {
+  id: number
+  merchant_name: string | null
+  bill_date: string | null
+  status: BillStatus
+  items: { id: number; name: string; amount: number }[]
+  total: number
+  group_id: number
+  group_name: string
+}
+
+export type BuddyDetail = {
+  id: number
+  user: User
+  balance: number
+  bills: BuddyBill[]
+}
+
 export const buddyKeys = {
   list: ['buddies'] as const,
+  detail: (id: number) => ['buddies', id] as const,
 }
 
 async function fetchBuddies(): Promise<Buddy[]> {
@@ -22,6 +42,17 @@ export function useBuddies() {
   return useQuery({
     queryKey: buddyKeys.list,
     queryFn: fetchBuddies,
+  })
+}
+
+export function useBuddyDetail(id: number | undefined) {
+  return useQuery({
+    queryKey: buddyKeys.detail(id ?? 0),
+    queryFn: async () => {
+      const { data } = await api.get<{ data: BuddyDetail }>(`/buddies/${id}`)
+      return data.data
+    },
+    enabled: Boolean(id),
   })
 }
 

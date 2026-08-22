@@ -16,8 +16,10 @@ import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedBillsIndexRouteImport } from './routes/_authenticated/bills/index'
 import { Route as AuthenticatedBillsBillIdRouteImport } from './routes/_authenticated/bills/$billId'
 import { Route as AuthenticatedBuddiesIndexRouteImport } from './routes/_authenticated/buddies/index'
+import { Route as AuthenticatedBuddiesBuddyIdRouteImport } from './routes/_authenticated/buddies/$buddyId'
 import { Route as AuthenticatedGroupsIndexRouteImport } from './routes/_authenticated/groups/index'
 import { Route as AuthenticatedGroupsGroupIdRouteImport } from './routes/_authenticated/groups/$groupId'
+import { Route as AuthenticatedGroupsGroupIdMembersMemberIdRouteImport } from './routes/_authenticated/groups/$groupId.members.$memberId'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -55,6 +57,12 @@ const AuthenticatedBuddiesIndexRoute =
     path: '/buddies/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedBuddiesBuddyIdRoute =
+  AuthenticatedBuddiesBuddyIdRouteImport.update({
+    id: '/buddies/$buddyId',
+    path: '/buddies/$buddyId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedGroupsIndexRoute =
   AuthenticatedGroupsIndexRouteImport.update({
     id: '/groups/',
@@ -67,26 +75,36 @@ const AuthenticatedGroupsGroupIdRoute =
     path: '/groups/$groupId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedGroupsGroupIdMembersMemberIdRoute =
+  AuthenticatedGroupsGroupIdMembersMemberIdRouteImport.update({
+    id: '/members/$memberId',
+    path: '/members/$memberId',
+    getParentRoute: () => AuthenticatedGroupsGroupIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/bills/$billId': typeof AuthenticatedBillsBillIdRoute
-  '/groups/$groupId': typeof AuthenticatedGroupsGroupIdRoute
+  '/buddies/$buddyId': typeof AuthenticatedBuddiesBuddyIdRoute
+  '/groups/$groupId': typeof AuthenticatedGroupsGroupIdRouteWithChildren
   '/bills/': typeof AuthenticatedBillsIndexRoute
   '/buddies/': typeof AuthenticatedBuddiesIndexRoute
   '/groups/': typeof AuthenticatedGroupsIndexRoute
+  '/groups/$groupId/members/$memberId': typeof AuthenticatedGroupsGroupIdMembersMemberIdRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/': typeof AuthenticatedIndexRoute
   '/bills/$billId': typeof AuthenticatedBillsBillIdRoute
-  '/groups/$groupId': typeof AuthenticatedGroupsGroupIdRoute
+  '/buddies/$buddyId': typeof AuthenticatedBuddiesBuddyIdRoute
+  '/groups/$groupId': typeof AuthenticatedGroupsGroupIdRouteWithChildren
   '/bills': typeof AuthenticatedBillsIndexRoute
   '/buddies': typeof AuthenticatedBuddiesIndexRoute
   '/groups': typeof AuthenticatedGroupsIndexRoute
+  '/groups/$groupId/members/$memberId': typeof AuthenticatedGroupsGroupIdMembersMemberIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -95,10 +113,12 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/bills/$billId': typeof AuthenticatedBillsBillIdRoute
-  '/_authenticated/groups/$groupId': typeof AuthenticatedGroupsGroupIdRoute
+  '/_authenticated/buddies/$buddyId': typeof AuthenticatedBuddiesBuddyIdRoute
+  '/_authenticated/groups/$groupId': typeof AuthenticatedGroupsGroupIdRouteWithChildren
   '/_authenticated/bills/': typeof AuthenticatedBillsIndexRoute
   '/_authenticated/buddies/': typeof AuthenticatedBuddiesIndexRoute
   '/_authenticated/groups/': typeof AuthenticatedGroupsIndexRoute
+  '/_authenticated/groups/$groupId/members/$memberId': typeof AuthenticatedGroupsGroupIdMembersMemberIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -107,20 +127,24 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/bills/$billId'
+    | '/buddies/$buddyId'
     | '/groups/$groupId'
     | '/bills/'
     | '/buddies/'
     | '/groups/'
+    | '/groups/$groupId/members/$memberId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
     | '/register'
     | '/'
     | '/bills/$billId'
+    | '/buddies/$buddyId'
     | '/groups/$groupId'
     | '/bills'
     | '/buddies'
     | '/groups'
+    | '/groups/$groupId/members/$memberId'
   id:
     | '__root__'
     | '/_authenticated'
@@ -128,10 +152,12 @@ export interface FileRouteTypes {
     | '/register'
     | '/_authenticated/'
     | '/_authenticated/bills/$billId'
+    | '/_authenticated/buddies/$buddyId'
     | '/_authenticated/groups/$groupId'
     | '/_authenticated/bills/'
     | '/_authenticated/buddies/'
     | '/_authenticated/groups/'
+    | '/_authenticated/groups/$groupId/members/$memberId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -191,6 +217,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBuddiesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/buddies/$buddyId': {
+      id: '/_authenticated/buddies/$buddyId'
+      path: '/buddies/$buddyId'
+      fullPath: '/buddies/$buddyId'
+      preLoaderRoute: typeof AuthenticatedBuddiesBuddyIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/groups/': {
       id: '/_authenticated/groups/'
       path: '/groups'
@@ -205,13 +238,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedGroupsGroupIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/groups/$groupId/members/$memberId': {
+      id: '/_authenticated/groups/$groupId/members/$memberId'
+      path: '/members/$memberId'
+      fullPath: '/groups/$groupId/members/$memberId'
+      preLoaderRoute: typeof AuthenticatedGroupsGroupIdMembersMemberIdRouteImport
+      parentRoute: typeof AuthenticatedGroupsGroupIdRoute
+    }
   }
 }
+
+interface AuthenticatedGroupsGroupIdRouteChildren {
+  AuthenticatedGroupsGroupIdMembersMemberIdRoute: typeof AuthenticatedGroupsGroupIdMembersMemberIdRoute
+}
+
+const AuthenticatedGroupsGroupIdRouteChildren: AuthenticatedGroupsGroupIdRouteChildren =
+  {
+    AuthenticatedGroupsGroupIdMembersMemberIdRoute:
+      AuthenticatedGroupsGroupIdMembersMemberIdRoute,
+  }
+
+const AuthenticatedGroupsGroupIdRouteWithChildren =
+  AuthenticatedGroupsGroupIdRoute._addFileChildren(
+    AuthenticatedGroupsGroupIdRouteChildren,
+  )
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedBillsBillIdRoute: typeof AuthenticatedBillsBillIdRoute
-  AuthenticatedGroupsGroupIdRoute: typeof AuthenticatedGroupsGroupIdRoute
+  AuthenticatedBuddiesBuddyIdRoute: typeof AuthenticatedBuddiesBuddyIdRoute
+  AuthenticatedGroupsGroupIdRoute: typeof AuthenticatedGroupsGroupIdRouteWithChildren
   AuthenticatedBillsIndexRoute: typeof AuthenticatedBillsIndexRoute
   AuthenticatedBuddiesIndexRoute: typeof AuthenticatedBuddiesIndexRoute
   AuthenticatedGroupsIndexRoute: typeof AuthenticatedGroupsIndexRoute
@@ -220,7 +276,8 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedBillsBillIdRoute: AuthenticatedBillsBillIdRoute,
-  AuthenticatedGroupsGroupIdRoute: AuthenticatedGroupsGroupIdRoute,
+  AuthenticatedBuddiesBuddyIdRoute: AuthenticatedBuddiesBuddyIdRoute,
+  AuthenticatedGroupsGroupIdRoute: AuthenticatedGroupsGroupIdRouteWithChildren,
   AuthenticatedBillsIndexRoute: AuthenticatedBillsIndexRoute,
   AuthenticatedBuddiesIndexRoute: AuthenticatedBuddiesIndexRoute,
   AuthenticatedGroupsIndexRoute: AuthenticatedGroupsIndexRoute,

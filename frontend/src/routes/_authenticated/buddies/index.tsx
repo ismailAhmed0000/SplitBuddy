@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
 import { useCurrentUser } from '@/lib/auth'
 import { useAddBuddy, useBuddies, useRemoveBuddy } from '@/lib/buddies'
@@ -129,10 +129,10 @@ function BuddiesPage() {
 
           {buddies?.map((buddy) => (
             <div key={buddy.id} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
-              <div>
+              <Link to="/buddies/$buddyId" params={{ buddyId: String(buddy.id) }} className="min-w-0 flex-1">
                 <p className="text-sm text-slate-800">{buddy.user.name}</p>
                 <p className="text-xs text-slate-500">@{buddy.user.username}</p>
-              </div>
+              </Link>
               <button
                 type="button"
                 onClick={() => handleRemove(buddy.id, buddy.user.name)}

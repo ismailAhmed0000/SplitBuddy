@@ -8,12 +8,16 @@ use App\Http\Requests\StoreGroupRequest;
 use App\Http\Requests\UpdateGroupRequest;
 use App\Http\Resources\GroupMemberResource;
 use App\Http\Resources\GroupResource;
+use App\Http\Resources\UserResource;
 use App\Models\Group;
+use App\Services\BalanceService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class GroupController extends Controller
 {
+    public function __construct(private readonly BalanceService $balances) {}
+
     public function index(Request $request): JsonResponse
     {
         $userId = $request->user()->id;
@@ -87,6 +91,28 @@ class GroupController extends Controller
         $member = $group->members()->create($request->validated());
 
         return response()->json(['data' => new GroupMemberResource($member->load('user'))], 201);
+    }
+
+    public function showMember(Request $request, int $id, int $memberId): JsonResponse
+    {
+        $group = Group::with('members.user')->findOrFail($id);
+
+        $this->authorizeMembership($group, $request->user()->id);
+
+        $member = $group->members->firstWhere('id', $memberId);
+
+        abort_if(! $member, 404);
+
+        $balance = $this->balances->forGroup($group)->firstWhere('group_member_id', $memberId);
+
+        return response()->json(['data' => [
+            'id' => $member->id,
+            'group_id' => $group->id,
+            'name' => $member->name,
+            'user' => $member->user ? new UserResource($member->user) : null,
+            'balance' => $balance['balance'] ?? 0.0,
+            'bills' => $this->balances->billsForMember($group, $member),
+        ]]);
     }
 
     public function removeMember(Request $request, int $id, int $memberId): JsonResponse
