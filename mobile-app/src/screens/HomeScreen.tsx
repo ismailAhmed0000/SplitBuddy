@@ -3,6 +3,7 @@ import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 import { useAppSelector } from '../store/hooks';
 import { useGetCurrentUserQuery, useLogoutMutation } from '../store/api/apiSlice';
 import { requestNotificationPermission, setupPushNotifications } from '../services/pushNotifications';
+import { BellIcon } from '../components/icons';
 
 export default function HomeScreen() {
   const cachedUser = useAppSelector((state) => state.auth.user);
@@ -18,13 +19,17 @@ export default function HomeScreen() {
 
   return (
     <View className="flex-1 bg-slate-50 px-6 pt-16">
-      <Text className="text-2xl font-semibold text-slate-900">Hey {displayUser?.name ?? 'there'} 👋</Text>
-      <Text className="mt-1 text-sm text-slate-500">@{displayUser?.username}</Text>
-
-      <View className="mt-8 rounded-2xl border border-slate-200 bg-white p-5">
-        <Text className="text-sm text-slate-600">
-          This is the SplitBuddy mobile scaffold — groups, bills, and buddies screens plug in here next.
-        </Text>
+      <View className="flex-row items-start justify-between">
+        <View>
+          <Text className="text-2xl font-semibold text-slate-900">Hey {displayUser?.name ?? 'there'} 👋</Text>
+          <Text className="mt-1 text-sm text-slate-500">@{displayUser?.username}</Text>
+        </View>
+        <TouchableOpacity
+          accessibilityLabel="Notifications"
+          className="h-14 w-14 items-center justify-center rounded-full bg-white shadow-sm"
+        >
+          <BellIcon size={26} />
+        </TouchableOpacity>
       </View>
 
       <TouchableOpacity
