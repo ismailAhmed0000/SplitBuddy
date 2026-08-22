@@ -71,7 +71,7 @@ function GroupDetailPage() {
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
-      <Link to="/groups" className="text-sm font-medium text-violet-600 hover:text-violet-700">
+      <Link to="/groups" className="text-sm font-medium text-brand-600 hover:text-brand-700">
         ← Back to groups
       </Link>
 
@@ -83,12 +83,12 @@ function GroupDetailPage() {
             onChange={(e) => setName(e.target.value)}
             onBlur={saveName}
             onKeyDown={(e) => e.key === 'Enter' && saveName()}
-            className="rounded-lg border border-violet-300 px-2 py-1 text-2xl font-semibold text-slate-900 outline-none focus:ring-2 focus:ring-violet-500/50"
+            className="rounded-lg border border-brand-300 px-2 py-1 text-2xl font-semibold text-ink outline-none focus:ring-2 focus:ring-brand-500/50"
           />
         ) : (
           <h1
             onClick={() => isCreator && startEditingName()}
-            className={`text-2xl font-semibold text-slate-900 ${isCreator ? 'cursor-pointer hover:text-violet-700' : ''}`}
+            className={`text-2xl font-semibold text-ink ${isCreator ? 'cursor-pointer hover:text-brand-700' : ''}`}
           >
             {group.name}
           </h1>
@@ -98,7 +98,7 @@ function GroupDetailPage() {
           <button
             type="button"
             onClick={handleDeleteGroup}
-            className="rounded-lg border border-red-200 px-3 py-1.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
+            className="rounded-lg border border-error-200 px-3 py-1.5 text-sm font-medium text-error-600 transition hover:bg-error-50"
           >
             Delete group
           </button>
@@ -110,7 +110,7 @@ function GroupDetailPage() {
       <BalancesSection groupId={id} balances={balances ?? []} members={group.members} />
 
       <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-sm font-semibold text-slate-900">Bills</h2>
+        <h2 className="text-sm font-semibold text-ink">Bills</h2>
         <div className="mt-3 flex flex-col gap-2">
           {bills?.length === 0 && <p className="text-sm text-slate-500">No bills in this group yet.</p>}
           {bills?.map((bill) => (
@@ -118,9 +118,9 @@ function GroupDetailPage() {
               key={bill.id}
               to="/bills/$billId"
               params={{ billId: String(bill.id) }}
-              className="flex items-center justify-between rounded-lg border border-slate-100 px-3 py-2 text-sm transition hover:border-violet-200"
+              className="flex items-center justify-between rounded-lg border border-slate-100 px-3 py-2 text-sm transition hover:border-brand-200"
             >
-              <span className="text-slate-900">{bill.merchant_name ?? 'Receipt'}</span>
+              <span className="text-ink">{bill.merchant_name ?? 'Receipt'}</span>
               <span className="font-medium text-slate-700">{money(bill.total)}</span>
             </Link>
           ))}
@@ -178,7 +178,7 @@ function BuddiesSection({
 
   return (
     <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h2 className="text-sm font-semibold text-slate-900">Buddies</h2>
+      <h2 className="text-sm font-semibold text-ink">Buddies</h2>
 
       <div className="mt-3 flex flex-col gap-2">
         {members.map((member) => (
@@ -189,7 +189,7 @@ function BuddiesSection({
                 type="button"
                 onClick={() => onRemove(member.id, member.name)}
                 aria-label={`Remove ${member.name}`}
-                className="text-xs font-medium text-slate-400 transition hover:text-red-600"
+                className="text-xs font-medium text-slate-400 transition hover:text-error-600"
               >
                 Remove
               </button>
@@ -206,7 +206,7 @@ function BuddiesSection({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           placeholder="Search your buddies, or type a name to add"
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none placeholder:text-slate-400 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/50"
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/50"
         />
 
         {isFocused && query.trim() && (
@@ -226,7 +226,7 @@ function BuddiesSection({
                     onClick={() => addByUser({ id: b.buddy_user_id, name: b.user.name })}
                     className="flex w-full flex-col px-3 py-2 text-left text-sm hover:bg-slate-50"
                   >
-                    <span className="font-medium text-slate-900">{b.user.name}</span>
+                    <span className="font-medium text-ink">{b.user.name}</span>
                     <span className="text-xs text-slate-500">@{b.user.username}</span>
                   </button>
                 ))}
@@ -245,7 +245,7 @@ function BuddiesSection({
                     onClick={() => addByUser(u)}
                     className="flex w-full flex-col px-3 py-2 text-left text-sm hover:bg-slate-50"
                   >
-                    <span className="font-medium text-slate-900">{u.name}</span>
+                    <span className="font-medium text-ink">{u.name}</span>
                     <span className="text-xs text-slate-500">{u.email}</span>
                   </button>
                 ))}
@@ -254,7 +254,7 @@ function BuddiesSection({
             <button
               type="button"
               onClick={() => addByName(query.trim())}
-              className="flex w-full items-center gap-1.5 border-t border-slate-100 px-3 py-2 text-left text-sm text-violet-700 hover:bg-violet-50"
+              className="flex w-full items-center gap-1.5 border-t border-slate-100 px-3 py-2 text-left text-sm text-brand-700 hover:bg-brand-50"
             >
               + Add "{query.trim()}" as a new buddy
             </button>
@@ -280,11 +280,11 @@ function BalancesSection({
   return (
     <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-slate-900">Balances</h2>
+        <h2 className="text-sm font-semibold text-ink">Balances</h2>
         <button
           type="button"
           onClick={() => setIsSettling((open) => !open)}
-          className="text-sm font-medium text-violet-600 hover:text-violet-700"
+          className="text-sm font-medium text-brand-600 hover:text-brand-700"
         >
           {isSettling ? 'Cancel' : 'Settle up'}
         </button>
@@ -296,7 +296,7 @@ function BalancesSection({
             <span className="text-slate-700">{b.name}</span>
             <span
               className={
-                b.balance > 0 ? 'font-medium text-emerald-600' : b.balance < 0 ? 'font-medium text-red-600' : 'text-slate-500'
+                b.balance > 0 ? 'font-medium text-brand-600' : b.balance < 0 ? 'font-medium text-error-600' : 'text-slate-500'
               }
             >
               {b.balance > 0 ? `+${money(b.balance)}` : money(b.balance)}
@@ -362,14 +362,14 @@ function SettleUpForm({
   }
 
   return (
-    <div className="mt-4 flex flex-col gap-3 rounded-xl border border-violet-100 bg-violet-50/50 p-4">
+    <div className="mt-4 flex flex-col gap-3 rounded-xl border border-brand-100 bg-brand-50/50 p-4">
       <div className="grid grid-cols-2 gap-3">
         <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
           Paid by
           <select
             value={paidBy}
             onChange={(e) => setPaidBy(e.target.value ? Number(e.target.value) : '')}
-            className="rounded-lg border border-slate-300 px-2 py-1.5 text-sm outline-none focus:border-violet-500"
+            className="rounded-lg border border-slate-300 px-2 py-1.5 text-sm outline-none focus:border-brand-500"
           >
             <option value="">Select…</option>
             {members.map((m) => (
@@ -384,7 +384,7 @@ function SettleUpForm({
           <select
             value={paidTo}
             onChange={(e) => setPaidTo(e.target.value ? Number(e.target.value) : '')}
-            className="rounded-lg border border-slate-300 px-2 py-1.5 text-sm outline-none focus:border-violet-500"
+            className="rounded-lg border border-slate-300 px-2 py-1.5 text-sm outline-none focus:border-brand-500"
           >
             <option value="">Select…</option>
             {members.map((m) => (
@@ -404,7 +404,7 @@ function SettleUpForm({
           step="0.01"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          className="rounded-lg border border-slate-300 px-2 py-1.5 text-sm outline-none focus:border-violet-500"
+          className="rounded-lg border border-slate-300 px-2 py-1.5 text-sm outline-none focus:border-brand-500"
         />
       </label>
 
@@ -412,7 +412,7 @@ function SettleUpForm({
         type="button"
         onClick={handleSubmit}
         disabled={createSettlement.isPending}
-        className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-50"
+        className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {createSettlement.isPending ? 'Recording…' : 'Record settlement'}
       </button>

@@ -44,16 +44,16 @@ export function BuddyQrScanner({
   }, [onScan])
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 p-4">
       <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-slate-900">Scan a buddy code</h3>
+          <h3 className="text-sm font-semibold text-ink">Scan a buddy code</h3>
           <button type="button" onClick={onClose} className="text-sm text-slate-400 hover:text-slate-600">
             Close
           </button>
         </div>
 
-        {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+        {error && <p className="mt-4 text-sm text-error-600">{error}</p>}
 
         <div id={ELEMENT_ID} className={`mt-4 overflow-hidden rounded-xl ${error ? 'hidden' : ''}`} />
       </div>

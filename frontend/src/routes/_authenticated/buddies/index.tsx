@@ -52,7 +52,7 @@ function BuddiesPage() {
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="text-2xl font-semibold text-slate-900">Buddies</h1>
+      <h1 className="text-2xl font-semibold text-ink">Buddies</h1>
       <p className="mt-1 text-sm text-slate-500">
         Your go-to list for splitting bills — add friends by username or QR code.
       </p>
@@ -61,7 +61,7 @@ function BuddiesPage() {
         {currentUser && <BuddyQrCode user={currentUser} />}
 
         <div className="flex flex-col justify-center gap-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-sm font-semibold text-slate-900">Add a buddy</h2>
+          <h2 className="text-sm font-semibold text-ink">Add a buddy</h2>
 
           <button
             type="button"
@@ -69,7 +69,7 @@ function BuddiesPage() {
               setFeedback(null)
               setIsScanning(true)
             }}
-            className="rounded-lg border border-violet-200 bg-violet-50 px-4 py-2 text-sm font-medium text-violet-700 transition hover:bg-violet-100"
+            className="rounded-lg border border-brand-200 bg-brand-50 px-4 py-2 text-sm font-medium text-brand-700 transition hover:bg-brand-100"
           >
             Scan a QR code
           </button>
@@ -82,7 +82,7 @@ function BuddiesPage() {
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               placeholder="Search by username, name, or email"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none placeholder:text-slate-400 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/50"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/50"
             />
 
             {isFocused && query.trim().length >= 2 && (
@@ -99,7 +99,7 @@ function BuddiesPage() {
                       onClick={() => addByUsername(u.username, u.name)}
                       className="flex w-full flex-col px-3 py-2 text-left text-sm hover:bg-slate-50"
                     >
-                      <span className="font-medium text-slate-900">{u.name}</span>
+                      <span className="font-medium text-ink">{u.name}</span>
                       <span className="text-xs text-slate-500">@{u.username}</span>
                     </button>
                   ))}
@@ -110,7 +110,7 @@ function BuddiesPage() {
           </div>
 
           {feedback && (
-            <p className={`text-sm ${feedback.type === 'success' ? 'text-emerald-600' : 'text-red-600'}`}>
+            <p className={`text-sm ${feedback.type === 'success' ? 'text-brand-600' : 'text-error-600'}`}>
               {feedback.message}
             </p>
           )}
@@ -118,7 +118,7 @@ function BuddiesPage() {
       </div>
 
       <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-sm font-semibold text-slate-900">Your buddies</h2>
+        <h2 className="text-sm font-semibold text-ink">Your buddies</h2>
 
         <div className="mt-3 flex flex-col gap-2">
           {isLoading && <p className="text-sm text-slate-500">Loading…</p>}
@@ -137,7 +137,7 @@ function BuddiesPage() {
                 type="button"
                 onClick={() => handleRemove(buddy.id, buddy.user.name)}
                 aria-label={`Remove ${buddy.user.name}`}
-                className="text-xs font-medium text-slate-400 transition hover:text-red-600"
+                className="text-xs font-medium text-slate-400 transition hover:text-error-600"
               >
                 Remove
               </button>

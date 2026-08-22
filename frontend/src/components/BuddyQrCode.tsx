@@ -18,7 +18,7 @@ export function BuddyQrCode({ user }: { user: User }) {
         <QRCodeSVG value={buddyQrValue(user.username)} size={176} />
       </div>
       <div className="text-center">
-        <p className="text-sm font-medium text-slate-900">@{user.username}</p>
+        <p className="text-sm font-medium text-ink">@{user.username}</p>
         <p className="text-xs text-slate-500">Let a buddy scan this to add you</p>
       </div>
     </div>

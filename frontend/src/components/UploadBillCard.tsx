@@ -53,7 +53,7 @@ export function UploadBillCard() {
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h2 className="text-base font-semibold text-slate-900">Upload a bill</h2>
+      <h2 className="text-base font-semibold text-ink">Upload a bill</h2>
       <p className="mt-1 text-sm text-slate-500">Snap or upload a receipt and we'll read the items for you.</p>
 
       <div
@@ -70,7 +70,7 @@ export function UploadBillCard() {
           if (e.key === 'Enter' || e.key === ' ') inputRef.current?.click()
         }}
         className={`mt-4 flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-4 py-10 text-center transition ${
-          isDragging ? 'border-violet-500 bg-violet-50' : 'border-slate-300 hover:border-violet-400 hover:bg-slate-50'
+          isDragging ? 'border-brand-500 bg-brand-50' : 'border-slate-300 hover:border-brand-400 hover:bg-slate-50'
         }`}
       >
         <svg
@@ -111,7 +111,7 @@ export function UploadBillCard() {
             <select
               value={selectedGroupId}
               onChange={(e) => setSelectedGroupId(e.target.value ? Number(e.target.value) : '')}
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/50"
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-ink outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/50"
             >
               <option value="">Select a group…</option>
               {groups?.map((group) => (
@@ -128,18 +128,18 @@ export function UploadBillCard() {
               placeholder="Name your group (e.g. Trip to Bali)"
               value={newGroupName}
               onChange={(e) => setNewGroupName(e.target.value)}
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/50"
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-ink outline-none placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/50"
             />
           )}
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-error-600">{error}</p>}
 
           <div className="flex flex-col gap-2 sm:flex-row">
             <button
               type="button"
               onClick={handleContinue}
               disabled={isSubmitting}
-              className="flex-1 rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex-1 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSubmitting ? 'Reading your receipt…' : 'Continue'}
             </button>

@@ -8,7 +8,7 @@ export const Route = createRootRoute({
 
 function RootLayout() {
   return (
-    <div className="min-h-svh bg-slate-50">
+    <div className="min-h-svh bg-canvas">
       <Outlet />
       <TanStackRouterDevtools position="bottom-right" />
       <ReactQueryDevtools buttonPosition="bottom-left" />

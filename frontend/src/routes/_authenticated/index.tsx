@@ -12,7 +12,7 @@ function DashboardPage() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="text-2xl font-semibold text-slate-900">Welcome, {user?.name}</h1>
+      <h1 className="text-2xl font-semibold text-ink">Welcome, {user?.name}</h1>
       <p className="mt-1 text-sm text-slate-500">Here's where things stand.</p>
 
       <div className="mt-6">

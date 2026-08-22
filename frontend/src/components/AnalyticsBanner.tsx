@@ -21,7 +21,7 @@ export function AnalyticsBanner() {
   const isOwing = overall < 0
 
   const statusLabel = isOwed ? "You're owed" : isOwing ? 'You owe' : "You're settled up"
-  const amountColor = isOwed ? 'text-emerald-600' : isOwing ? 'text-red-600' : 'text-slate-900'
+  const amountColor = isOwed ? 'text-brand-600' : isOwing ? 'text-error-600' : 'text-ink'
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -35,7 +35,7 @@ export function AnalyticsBanner() {
 
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <p className="text-sm font-medium text-slate-500">Active groups</p>
-        <p className="mt-1 text-3xl font-semibold text-slate-900">{groupCount}</p>
+        <p className="mt-1 text-3xl font-semibold text-ink">{groupCount}</p>
       </div>
     </div>
   )

@@ -35,13 +35,13 @@ export function ItemAssignmentRow({
     <div className="rounded-xl border border-slate-200 p-4">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-medium text-slate-900">{item.name}</p>
+          <p className="text-sm font-medium text-ink">{item.name}</p>
           <p className="text-xs text-slate-500">
             {item.quantity} × {money(item.unit_price)}
           </p>
         </div>
         <div className="text-right">
-          <p className="text-sm font-semibold text-slate-900">{money(loadedPrice)}</p>
+          <p className="text-sm font-semibold text-ink">{money(loadedPrice)}</p>
           {hasLoadedCharges && (
             <p className="text-xs text-slate-400 line-through">{money(item.total_price)}</p>
           )}
@@ -59,7 +59,7 @@ export function ItemAssignmentRow({
               key={member.id}
               className={`flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition ${
                 checked
-                  ? 'border-violet-500 bg-violet-50 text-violet-700'
+                  ? 'border-brand-500 bg-brand-50 text-brand-700'
                   : 'border-slate-300 text-slate-600 hover:bg-slate-50'
               } ${isPending ? 'opacity-60' : ''}`}
             >

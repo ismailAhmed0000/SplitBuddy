@@ -24,7 +24,7 @@ export function NotificationsBell() {
           />
         </svg>
         {unreadCount > 0 && (
-          <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">
+          <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-error-500 px-1 text-[10px] font-semibold text-white">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -35,7 +35,7 @@ export function NotificationsBell() {
           <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
           <div className="absolute right-0 z-20 mt-2 w-80 max-w-[90vw] rounded-xl border border-slate-200 bg-white shadow-lg">
             <div className="border-b border-slate-100 px-4 py-3">
-              <p className="text-sm font-semibold text-slate-900">Notifications</p>
+              <p className="text-sm font-semibold text-ink">Notifications</p>
             </div>
             <div className="max-h-80 overflow-y-auto">
               {!notifications || notifications.length === 0 ? (
@@ -47,11 +47,11 @@ export function NotificationsBell() {
                     type="button"
                     onClick={() => !notification.read && markRead.mutate(notification.id)}
                     className={`block w-full border-b border-slate-50 px-4 py-3 text-left text-sm transition last:border-b-0 hover:bg-slate-50 ${
-                      notification.read ? 'text-slate-500' : 'font-medium text-slate-900'
+                      notification.read ? 'text-slate-500' : 'font-medium text-ink'
                     }`}
                   >
                     <div className="flex items-start gap-2">
-                      {!notification.read && <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-violet-600" />}
+                      {!notification.read && <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-600" />}
                       <span>{notification.message}</span>
                     </div>
                   </button>

@@ -38,13 +38,13 @@ function BillReviewPage() {
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
-      <Link to="/" className="text-sm font-medium text-violet-600 hover:text-violet-700">
+      <Link to="/" className="text-sm font-medium text-brand-600 hover:text-brand-700">
         ← Back to dashboard
       </Link>
 
       <div className="mt-3 flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">
+          <h1 className="text-2xl font-semibold text-ink">
             {bill.merchant_name ?? 'Receipt'}
           </h1>
           {bill.bill_date && <p className="mt-1 text-sm text-slate-500">{bill.bill_date}</p>}
@@ -56,21 +56,21 @@ function BillReviewPage() {
 
       {bill.status === 'processing' && (
         <div className="mt-6 flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white p-10 text-center shadow-sm">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-200 border-t-violet-600" />
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-200 border-t-brand-600" />
           <p className="text-sm font-medium text-slate-700">Reading your receipt…</p>
           <p className="text-sm text-slate-500">This usually takes a few seconds.</p>
         </div>
       )}
 
       {bill.status === 'failed' && (
-        <div className="mt-6 flex flex-col items-center gap-3 rounded-2xl border border-red-200 bg-red-50 p-10 text-center">
-          <p className="text-sm font-medium text-red-700">We couldn't read this receipt.</p>
-          <p className="text-sm text-red-600">Try a clearer photo, or retry with the same image.</p>
+        <div className="mt-6 flex flex-col items-center gap-3 rounded-2xl border border-error-200 bg-error-50 p-10 text-center">
+          <p className="text-sm font-medium text-error-700">We couldn't read this receipt.</p>
+          <p className="text-sm text-error-600">Try a clearer photo, or retry with the same image.</p>
           <button
             type="button"
             onClick={() => retryExtraction.mutate()}
             disabled={retryExtraction.isPending}
-            className="mt-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-2 rounded-lg bg-error-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-error-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {retryExtraction.isPending ? 'Retrying…' : 'Retry extraction'}
           </button>
@@ -112,7 +112,7 @@ function BillReviewPage() {
 
           <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-slate-900">Buddies</h2>
+              <h2 className="text-sm font-semibold text-ink">Buddies</h2>
             </div>
             <div className="mt-3 flex flex-wrap items-center gap-2">
               {group?.members.map((member) => (
@@ -130,13 +130,13 @@ function BillReviewPage() {
                   onChange={(e) => setNewMemberName(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAddMember()}
                   placeholder="Add a buddy not on the app"
-                  className="rounded-full border border-dashed border-slate-300 px-3 py-1 text-xs outline-none placeholder:text-slate-400 focus:border-violet-500"
+                  className="rounded-full border border-dashed border-slate-300 px-3 py-1 text-xs outline-none placeholder:text-slate-400 focus:border-brand-500"
                 />
                 <button
                   type="button"
                   onClick={handleAddMember}
                   disabled={addMember.isPending || !newMemberName.trim()}
-                  className="rounded-full bg-violet-600 px-3 py-1 text-xs font-medium text-white transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-full bg-brand-600 px-3 py-1 text-xs font-medium text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Add
                 </button>
@@ -145,7 +145,7 @@ function BillReviewPage() {
           </div>
 
           <div className="mt-6 flex flex-col gap-3">
-            <h2 className="text-sm font-semibold text-slate-900">Items — tap a buddy to split</h2>
+            <h2 className="text-sm font-semibold text-ink">Items — tap a buddy to split</h2>
             {bill.items.map((item) => (
               <ItemAssignmentRow key={item.id} billId={bill.id} item={item} members={group?.members ?? []} />
             ))}
@@ -207,7 +207,7 @@ function SummaryField({ label, value, emphasize }: { label: string; value: strin
   return (
     <div>
       <dt className="text-xs text-slate-500">{label}</dt>
-      <dd className={emphasize ? 'font-semibold text-slate-900' : 'text-slate-700'}>{value}</dd>
+      <dd className={emphasize ? 'font-semibold text-ink' : 'text-slate-700'}>{value}</dd>
     </div>
   )
 }
@@ -216,8 +216,8 @@ function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
     processing: 'bg-amber-100 text-amber-700',
     parsed: 'bg-blue-100 text-blue-700',
-    confirmed: 'bg-emerald-100 text-emerald-700',
-    failed: 'bg-red-100 text-red-700',
+    confirmed: 'bg-brand-100 text-brand-700',
+    failed: 'bg-error-100 text-error-700',
   }
 
   return (

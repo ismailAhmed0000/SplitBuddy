@@ -33,7 +33,7 @@ function AuthenticatedLayout() {
   }
 
   return (
-    <div className="min-h-svh bg-slate-50">
+    <div className="min-h-svh bg-canvas">
       <Navbar />
       <Outlet />
     </div>

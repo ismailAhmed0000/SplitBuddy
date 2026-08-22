@@ -45,12 +45,12 @@ function LoginPage() {
   return (
     <div className="flex min-h-svh items-center justify-center px-4">
       <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-        <h1 className="text-2xl font-semibold text-slate-900">Welcome back</h1>
+        <h1 className="text-2xl font-semibold text-ink">Welcome back</h1>
         <p className="mt-1 text-sm text-slate-500">Log in to your SplitBuddy account.</p>
 
         <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4" noValidate>
           {formError && (
-            <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{formError}</p>
+            <p className="rounded-lg bg-error-50 px-3 py-2 text-sm text-error-600">{formError}</p>
           )}
 
           <TextField
@@ -78,7 +78,7 @@ function LoginPage() {
           <button
             type="submit"
             disabled={login.isPending}
-            className="mt-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {login.isPending ? 'Logging in…' : 'Log in'}
           </button>
@@ -86,7 +86,7 @@ function LoginPage() {
 
         <p className="mt-6 text-center text-sm text-slate-500">
           Don't have an account?{' '}
-          <Link to="/register" className="font-medium text-violet-600 hover:text-violet-700">
+          <Link to="/register" className="font-medium text-brand-600 hover:text-brand-700">
             Sign up
           </Link>
         </p>
