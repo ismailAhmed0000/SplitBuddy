@@ -5,7 +5,7 @@ module.exports = {
     '\\.css$': '<rootDir>/jest/cssMock.js',
   },
   transformIgnorePatterns: [
-    'node_modules/(?!((jest-)?react-native|@react-native(-community|-async-storage)?|immer|react-redux|@reduxjs|@react-navigation)/)',
+    'node_modules/(?!((jest-)?react-native|@react-native(-community|-async-storage)?|immer|react-redux|@reduxjs|@react-navigation|react-native-qrcode-svg|react-native-image-picker)/)',
   ],
   setupFiles: ['<rootDir>/jest/setup.js'],
 };

@@ -1,4 +1,4 @@
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, type NavigatorScreenParams } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useEffect } from 'react';
@@ -7,9 +7,9 @@ import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { hydrateAuth } from '../store/slices/authSlice';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
-import HomeScreen from '../screens/HomeScreen';
 import BuddiesScreen from '../screens/BuddiesScreen';
-import BillsScreen from '../screens/BillsScreen';
+import { HomeStack, type HomeStackParamList } from './HomeStack';
+import { BillsStack, type BillsStackParamList } from './BillsStack';
 import { BottomTabBar } from './BottomTabBar';
 
 export type AuthStackParamList = {
@@ -18,9 +18,9 @@ export type AuthStackParamList = {
 };
 
 export type AppTabParamList = {
-  Home: undefined;
+  Home: NavigatorScreenParams<HomeStackParamList>;
   Buddies: undefined;
-  Bills: undefined;
+  Bills: NavigatorScreenParams<BillsStackParamList>;
 };
 
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
@@ -37,7 +37,7 @@ export function RootNavigator() {
   if (!isHydrated) {
     return (
       <View className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator size="large" color="#7c3aed" />
+        <ActivityIndicator size="large" color="#0D9488" />
       </View>
     );
   }
@@ -46,9 +46,9 @@ export function RootNavigator() {
     <NavigationContainer>
       {token ? (
         <AppTab.Navigator tabBar={BottomTabBar} screenOptions={{ headerShown: false }}>
-          <AppTab.Screen name="Home" component={HomeScreen} />
+          <AppTab.Screen name="Home" component={HomeStack} />
           <AppTab.Screen name="Buddies" component={BuddiesScreen} />
-          <AppTab.Screen name="Bills" component={BillsScreen} />
+          <AppTab.Screen name="Bills" component={BillsStack} />
         </AppTab.Navigator>
       ) : (
         <AuthStack.Navigator screenOptions={{ headerShown: false }}>

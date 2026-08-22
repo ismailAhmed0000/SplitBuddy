@@ -1,64 +1,15 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { API_URL } from '../../config/env';
-import type { User } from '../../types/user';
-import { clearCredentials, setCredentials } from '../slices/authSlice';
-import type { RootState } from '../index';
+// This file re-exports the split-up API modules so existing imports
+// (`from '../store/api/apiSlice'`) keep working unchanged. Each domain's
+// endpoints live in their own file — see authApi.ts, buddiesApi.ts,
+// groupsApi.ts, billsApi.ts, assignmentsApi.ts, settlementsApi.ts, and
+// notificationsApi.ts — all built on the shared `baseApi` in baseApi.ts.
 
-type AuthResponse = { user: User; token: string };
+export { baseApi as api } from './baseApi';
 
-type LoginPayload = { email: string; password: string };
-
-type RegisterPayload = {
-  name: string;
-  email: string;
-  phone?: string;
-  password: string;
-  password_confirmation: string;
-};
-
-export const api = createApi({
-  reducerPath: 'api',
-  baseQuery: fetchBaseQuery({
-    baseUrl: API_URL,
-    prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as RootState).auth.token;
-      if (token) headers.set('Authorization', `Bearer ${token}`);
-      headers.set('Accept', 'application/json');
-      return headers;
-    },
-  }),
-  tagTypes: ['User'],
-  endpoints: (builder) => ({
-    login: builder.mutation<AuthResponse, LoginPayload>({
-      query: (body) => ({ url: '/login', method: 'POST', body }),
-      onQueryStarted: async (_arg, { dispatch, queryFulfilled }) => {
-        const { data } = await queryFulfilled;
-        dispatch(setCredentials(data));
-      },
-    }),
-    register: builder.mutation<AuthResponse, RegisterPayload>({
-      query: (body) => ({ url: '/register', method: 'POST', body }),
-      onQueryStarted: async (_arg, { dispatch, queryFulfilled }) => {
-        const { data } = await queryFulfilled;
-        dispatch(setCredentials(data));
-      },
-    }),
-    logout: builder.mutation<void, void>({
-      query: () => ({ url: '/logout', method: 'POST' }),
-      onQueryStarted: async (_arg, { dispatch, queryFulfilled }) => {
-        try {
-          await queryFulfilled;
-        } finally {
-          dispatch(clearCredentials());
-        }
-      },
-    }),
-    getCurrentUser: builder.query<User, void>({
-      query: () => '/user',
-      transformResponse: (response: { data: User }) => response.data,
-      providesTags: ['User'],
-    }),
-  }),
-});
-
-export const { useLoginMutation, useRegisterMutation, useLogoutMutation, useGetCurrentUserQuery } = api;
+export * from './authApi';
+export * from './buddiesApi';
+export * from './groupsApi';
+export * from './billsApi';
+export * from './assignmentsApi';
+export * from './settlementsApi';
+export * from './notificationsApi';
