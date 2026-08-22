@@ -10,9 +10,17 @@ import { name as appName } from './app.json';
 // Must be registered before the app renders, and outside the React tree,
 // per @react-native-firebase/messaging's requirements — this is what lets a
 // data-only push be handled while the app is backgrounded or killed.
-setBackgroundMessageHandler(getMessaging(), async () => {
-  // Notification-type pushes are displayed by the OS automatically; handle
-  // data-only pushes here (e.g. syncing state) once the backend sends them.
-});
+//
+// Guarded: `getMessaging()` throws until a real Firebase project is wired up
+// (see README "Push notifications setup") — without the guard the app can't
+// boot at all in the meantime.
+try {
+  setBackgroundMessageHandler(getMessaging(), async () => {
+    // Notification-type pushes are displayed by the OS automatically; handle
+    // data-only pushes here (e.g. syncing state) once the backend sends them.
+  });
+} catch {
+  // No Firebase app configured yet — push notifications stay inert.
+}
 
 AppRegistry.registerComponent(appName, () => App);

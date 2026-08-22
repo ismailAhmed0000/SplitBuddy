@@ -11,9 +11,24 @@ import {
 } from '@react-native-firebase/messaging';
 import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
 
-const messaging = getMessaging();
+/**
+ * `getMessaging()` throws until a real Firebase project is wired up (see
+ * README "Push notifications setup") — guard every entry point so the rest
+ * of the app keeps working, with push notifications simply staying inert,
+ * instead of crashing on boot.
+ */
+function getMessagingInstance(): ReturnType<typeof getMessaging> | null {
+  try {
+    return getMessaging();
+  } catch {
+    return null;
+  }
+}
 
 export async function requestNotificationPermission(): Promise<boolean> {
+  const messaging = getMessagingInstance();
+  if (!messaging) return false;
+
   if (Platform.OS === 'android' && Platform.Version >= 33) {
     const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
     if (granted !== PermissionsAndroid.RESULTS.GRANTED) return false;
@@ -27,6 +42,9 @@ export async function requestNotificationPermission(): Promise<boolean> {
 }
 
 export async function getFcmToken(): Promise<string | null> {
+  const messaging = getMessagingInstance();
+  if (!messaging) return null;
+
   try {
     return await getToken(messaging);
   } catch {
@@ -55,6 +73,9 @@ export function setupPushNotifications({
   onTokenRefresh?: (token: string) => void;
   onNotificationOpened?: (data: Record<string, unknown> | undefined) => void;
 } = {}) {
+  const messaging = getMessagingInstance();
+  if (!messaging) return () => {};
+
   const unsubscribeTokenRefresh = onTokenRefresh(messaging, (token) => {
     onTokenRefreshCallback?.(token);
   });
