@@ -2,8 +2,11 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { ItemAssignmentRow } from '@/components/ItemAssignmentRow'
 import { money } from '@/lib/format'
-import { useBill, useConfirmBill, useRetryExtraction } from '@/lib/bills'
-import { useAddGroupMember, useGroup } from '@/lib/groups'
+import { parseApiError } from '@/lib/api'
+import { useCurrentUser } from '@/lib/auth'
+import { useAddBillParticipant, useBill, useConfirmBill, useRemoveBillParticipant, useRetryExtraction } from '@/lib/bills'
+import { useBuddies } from '@/lib/buddies'
+import { useAddGroupMember, useGroup, useRemoveGroupMember } from '@/lib/groups'
 
 export const Route = createFileRoute('/_authenticated/bills/$billId')({
   component: BillReviewPage,
@@ -15,18 +18,69 @@ function BillReviewPage() {
 
   const { data: bill, isLoading } = useBill(id)
   const { data: group } = useGroup(bill?.group_id)
+  const { data: buddies } = useBuddies()
+  const { data: currentUser } = useCurrentUser()
   const retryExtraction = useRetryExtraction(id)
   const confirmBill = useConfirmBill(id)
   const addMember = useAddGroupMember(bill?.group_id)
+  const addParticipant = useAddBillParticipant(bill?.id)
+  const removeParticipant = useRemoveBillParticipant(bill?.id)
+  const removeGroupMember = useRemoveGroupMember(bill?.group_id ?? 0)
+
+  const isGroupCreator = group?.created_by === currentUser?.id
 
   const [newMemberName, setNewMemberName] = useState('')
+  const [buddyError, setBuddyError] = useState<string | null>(null)
 
   function handleAddMember() {
     if (!newMemberName.trim()) return
-    addMember.mutate({ name: newMemberName.trim() }, {
-      onSuccess: () => setNewMemberName(''),
-    })
+    setBuddyError(null)
+    addMember.mutate(
+      { name: newMemberName.trim() },
+      {
+        onSuccess: (member) => {
+          setNewMemberName('')
+          addParticipant.mutate(member.id, { onError: (err) => setBuddyError(parseApiError(err).message) })
+        },
+        onError: (err) => setBuddyError(parseApiError(err).message),
+      }
+    )
   }
+
+  function handleAddParticipant(memberId: number) {
+    setBuddyError(null)
+    addParticipant.mutate(memberId, { onError: (err) => setBuddyError(parseApiError(err).message) })
+  }
+
+  function handleAddRegisteredBuddy(buddyUserId: number, name: string) {
+    setBuddyError(null)
+    addMember.mutate(
+      { name, userId: buddyUserId },
+      {
+        onSuccess: (member) => {
+          addParticipant.mutate(member.id, { onError: (err) => setBuddyError(parseApiError(err).message) })
+        },
+        onError: (err) => setBuddyError(parseApiError(err).message),
+      }
+    )
+  }
+
+  function handleRemoveParticipant(memberId: number) {
+    setBuddyError(null)
+    removeParticipant.mutate(memberId, { onError: (err) => setBuddyError(parseApiError(err).message) })
+  }
+
+  function handleRemoveFromGroup(memberId: number, memberName: string) {
+    if (!confirm(`Remove ${memberName} from this group? This removes them from every bill in this group.`)) return
+    setBuddyError(null)
+    removeGroupMember.mutate(memberId, { onError: (err) => setBuddyError(parseApiError(err).message) })
+  }
+
+  const participantIds = new Set(bill?.participants.map((p) => p.id))
+  const availableMembers = group?.members.filter((m) => !participantIds.has(m.id)) ?? []
+
+  const groupMemberUserIds = new Set(group?.members.map((m) => m.user_id).filter((uid): uid is number => uid !== null))
+  const availableBuddies = buddies?.filter((b) => !groupMemberUserIds.has(b.user.id)) ?? []
 
   if (isLoading || !bill) {
     return (
@@ -114,40 +168,104 @@ function BillReviewPage() {
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-semibold text-ink">Buddies</h2>
             </div>
+
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              {group?.members.map((member) => (
+              {bill.participants.length === 0 && (
+                <p className="text-xs text-slate-500">Add who's splitting this bill.</p>
+              )}
+              {bill.participants.map((member) => (
                 <span
                   key={member.id}
-                  className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700"
+                  className="flex items-center gap-1.5 rounded-full bg-brand-100 py-1 pl-3 pr-1.5 text-xs font-medium text-brand-700"
                 >
                   {member.name}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveParticipant(member.id)}
+                    disabled={removeParticipant.isPending}
+                    aria-label={`Remove ${member.name} from this bill`}
+                    className="flex h-4 w-4 items-center justify-center rounded-full text-brand-700 transition hover:bg-brand-200 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    ×
+                  </button>
                 </span>
               ))}
-              <div className="flex items-center gap-1.5">
-                <input
-                  type="text"
-                  value={newMemberName}
-                  onChange={(e) => setNewMemberName(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleAddMember()}
-                  placeholder="Add a buddy not on the app"
-                  className="rounded-full border border-dashed border-slate-300 px-3 py-1 text-xs outline-none placeholder:text-slate-400 focus:border-brand-500"
-                />
-                <button
-                  type="button"
-                  onClick={handleAddMember}
-                  disabled={addMember.isPending || !newMemberName.trim()}
-                  className="rounded-full bg-brand-600 px-3 py-1 text-xs font-medium text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  Add
-                </button>
-              </div>
             </div>
+
+            {availableBuddies.length > 0 && (
+              <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
+                <span className="text-xs text-slate-500">Your buddies:</span>
+                {availableBuddies.map((buddy) => (
+                  <button
+                    key={buddy.id}
+                    type="button"
+                    onClick={() => handleAddRegisteredBuddy(buddy.user.id, buddy.user.name)}
+                    disabled={addMember.isPending || addParticipant.isPending}
+                    className="rounded-full border border-dashed border-slate-300 px-3 py-1 text-xs font-medium text-slate-600 transition hover:border-brand-400 hover:text-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    + {buddy.user.name}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {availableMembers.length > 0 && (
+              <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
+                <span className="text-xs text-slate-500">From this group:</span>
+                {availableMembers.map((member) => (
+                  <span
+                    key={member.id}
+                    className="flex items-center gap-1 rounded-full border border-dashed border-slate-300 py-1 pl-1 pr-1.5 text-xs font-medium text-slate-600"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => handleAddParticipant(member.id)}
+                      disabled={addParticipant.isPending}
+                      className="rounded-full px-2 py-0.5 transition hover:text-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      + {member.name}
+                    </button>
+                    {isGroupCreator && member.user_id !== currentUser?.id && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveFromGroup(member.id, member.name)}
+                        disabled={removeGroupMember.isPending}
+                        aria-label={`Remove ${member.name} from this group`}
+                        className="flex h-4 w-4 items-center justify-center rounded-full text-slate-400 transition hover:bg-error-100 hover:text-error-600 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-3 flex items-center gap-1.5 border-t border-slate-100 pt-3">
+              <input
+                type="text"
+                value={newMemberName}
+                onChange={(e) => setNewMemberName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddMember()}
+                placeholder="Add a buddy not on the app"
+                className="rounded-full border border-dashed border-slate-300 px-3 py-1 text-xs outline-none placeholder:text-slate-400 focus:border-brand-500"
+              />
+              <button
+                type="button"
+                onClick={handleAddMember}
+                disabled={addMember.isPending || !newMemberName.trim()}
+                className="rounded-full bg-brand-600 px-3 py-1 text-xs font-medium text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Add
+              </button>
+            </div>
+            {buddyError && <p className="mt-2 text-xs text-error-600">{buddyError}</p>}
           </div>
 
           <div className="mt-6 flex flex-col gap-3">
             <h2 className="text-sm font-semibold text-ink">Items — tap a buddy to split</h2>
             {bill.items.map((item) => (
-              <ItemAssignmentRow key={item.id} billId={bill.id} item={item} members={group?.members ?? []} />
+              <ItemAssignmentRow key={item.id} billId={bill.id} item={item} members={bill.participants} />
             ))}
           </div>
         </>

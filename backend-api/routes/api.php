@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BalanceController;
 use App\Http\Controllers\Api\BillController;
 use App\Http\Controllers\Api\BillItemController;
+use App\Http\Controllers\Api\BillParticipantController;
 use App\Http\Controllers\Api\BuddyController;
 use App\Http\Controllers\Api\GroupController;
 use App\Http\Controllers\Api\NotificationController;
@@ -51,6 +52,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/bills/{id}', [BillController::class, 'destroy']);
     Route::get('/bills/{id}/status', [BillController::class, 'status']);
     Route::post('/bills/{id}/extract', [BillController::class, 'extract']);
+    Route::post('/bills/{id}/participants', [BillParticipantController::class, 'store']);
+    Route::delete('/bills/{id}/participants/{participantId}', [BillParticipantController::class, 'destroy']);
 
     // Bill Items
     Route::get('/bills/{id}/items', [BillItemController::class, 'index']);

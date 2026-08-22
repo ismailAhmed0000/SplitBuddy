@@ -42,6 +42,7 @@ export type Bill = {
   total: string | null
   status: BillStatus
   items: BillItem[]
+  participants: GroupMember[]
 }
 
 export const billKeys = {
@@ -156,6 +157,35 @@ export function useDeleteAssignment(billId: number) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: billKeys.detail(billId) })
+    },
+  })
+}
+
+export function useAddBillParticipant(billId: number | undefined) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (groupMemberId: number) => {
+      const { data } = await api.post<{ data: GroupMember }>(`/bills/${billId}/participants`, {
+        group_member_id: groupMemberId,
+      })
+      return data.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: billKeys.detail(billId as number) })
+    },
+  })
+}
+
+export function useRemoveBillParticipant(billId: number | undefined) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (groupMemberId: number) => {
+      await api.delete(`/bills/${billId}/participants/${groupMemberId}`)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: billKeys.detail(billId as number) })
     },
   })
 }

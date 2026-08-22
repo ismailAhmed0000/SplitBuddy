@@ -53,7 +53,7 @@ class BillController extends Controller
         $this->runExtraction($bill, $file->getRealPath(), $file->getMimeType());
 
         return response()->json([
-            'data' => new BillResource($bill->fresh(['uploader', 'items.assignments'])),
+            'data' => new BillResource($bill->fresh(['uploader', 'items.assignments', 'participants.user'])),
         ], 201);
     }
 
@@ -75,7 +75,7 @@ class BillController extends Controller
 
         $this->runExtraction($bill, $disk->path($path), $disk->mimeType($path));
 
-        return new BillResource($bill->fresh(['uploader', 'items.assignments']));
+        return new BillResource($bill->fresh(['uploader', 'items.assignments', 'participants.user']));
     }
 
     private function runExtraction(Bill $bill, string $imagePath, string $mediaType): void
@@ -115,7 +115,7 @@ class BillController extends Controller
 
     public function show(Request $request, int $id): BillResource
     {
-        $bill = Bill::with('uploader', 'items.assignments', 'group')->findOrFail($id);
+        $bill = Bill::with('uploader', 'items.assignments', 'participants.user', 'group')->findOrFail($id);
 
         $this->authorizeMembership($bill->group, $request->user()->id);
 
@@ -131,7 +131,7 @@ class BillController extends Controller
         $bill->update($request->validated());
         app(BillItemPriceCalculator::class)->recalculate($bill);
 
-        return new BillResource($bill->fresh(['uploader', 'items.assignments']));
+        return new BillResource($bill->fresh(['uploader', 'items.assignments', 'participants.user']));
     }
 
     public function destroy(Request $request, int $id): JsonResponse

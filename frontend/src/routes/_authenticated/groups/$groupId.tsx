@@ -105,7 +105,13 @@ function GroupDetailPage() {
         )}
       </div>
 
-      <BuddiesSection groupId={id} members={group.members} isCreator={isCreator} onRemove={handleRemoveMember} />
+      <BuddiesSection
+        groupId={id}
+        members={group.members}
+        isCreator={isCreator}
+        currentUserId={currentUser?.id}
+        onRemove={handleRemoveMember}
+      />
 
       <BalancesSection groupId={id} balances={balances ?? []} members={group.members} />
 
@@ -134,11 +140,13 @@ function BuddiesSection({
   groupId,
   members,
   isCreator,
+  currentUserId,
   onRemove,
 }: {
   groupId: number
   members: { id: number; name: string; user_id: number | null }[]
   isCreator: boolean
+  currentUserId: number | undefined
   onRemove: (memberId: number, name: string) => void
 }) {
   const addMember = useAddGroupMember(groupId)
@@ -184,7 +192,7 @@ function BuddiesSection({
         {members.map((member) => (
           <div key={member.id} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
             <span className="text-sm text-slate-800">{member.name}</span>
-            {isCreator && (
+            {isCreator && member.user_id !== currentUserId && (
               <button
                 type="button"
                 onClick={() => onRemove(member.id, member.name)}

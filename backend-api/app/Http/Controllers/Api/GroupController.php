@@ -96,6 +96,9 @@ class GroupController extends Controller
         abort_unless($group->created_by === $request->user()->id, 403, 'Only the group creator can remove members.');
 
         $member = $group->members()->findOrFail($memberId);
+
+        abort_if($member->user_id === $request->user()->id, 422, 'You cannot remove yourself from the group.');
+
         $member->delete();
 
         return response()->json(status: 204);

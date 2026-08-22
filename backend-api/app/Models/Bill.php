@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
@@ -65,5 +66,15 @@ class Bill extends Model
     public function items(): HasMany
     {
         return $this->hasMany(BillItem::class);
+    }
+
+    /**
+     * The buddies selected as participants of this specific bill.
+     *
+     * @return BelongsToMany<GroupMember, $this>
+     */
+    public function participants(): BelongsToMany
+    {
+        return $this->belongsToMany(GroupMember::class, 'bill_participants')->withTimestamps();
     }
 }

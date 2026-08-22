@@ -32,6 +32,7 @@ class BillResource extends JsonResource
             'status' => $this->status,
             'uploader' => new UserResource($this->whenLoaded('uploader')),
             'items' => BillItemResource::collection($this->whenLoaded('items')),
+            'participants' => GroupMemberResource::collection($this->whenLoaded('participants')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
