@@ -151,7 +151,7 @@ function BuddiesAndBillsSection({
   isCreator: boolean
   currentUserId: number | undefined
   onRemove: (memberId: number, name: string) => void
-  bills: { id: number; merchant_name: string | null; total: number }[] | undefined
+  bills: { id: number; merchant_name: string | null; total: string | null }[] | undefined
 }) {
   const [tab, setTab] = useState<'buddies' | 'bills'>('buddies')
 
@@ -197,7 +197,7 @@ function BuddiesAndBillsSection({
   )
 }
 
-function BillsPanel({ bills }: { bills: { id: number; merchant_name: string | null; total: number }[] | undefined }) {
+function BillsPanel({ bills }: { bills: { id: number; merchant_name: string | null; total: string | null }[] | undefined }) {
   return (
     <div className="flex flex-col gap-2">
       {bills?.length === 0 && <p className="text-sm text-slate-500">No bills in this group yet.</p>}
