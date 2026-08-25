@@ -1,5 +1,7 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
+import { CollectorBadge } from '@/components/CollectorBadge'
+import { PaidStamp } from '@/components/PaidStamp'
 import { useCurrentUser } from '@/lib/auth'
 import {
   useAddGroupMember,
@@ -44,7 +46,7 @@ function GroupDetailPage() {
 
   function saveName() {
     if (name.trim() && name.trim() !== group?.name) {
-      updateGroup.mutate(name.trim())
+      updateGroup.mutate({ name: name.trim() })
     }
     setIsEditingName(false)
   }
@@ -68,6 +70,8 @@ function GroupDetailPage() {
       </main>
     )
   }
+
+  const myMemberId = group.members.find((m) => m.user_id === currentUser?.id)?.id
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
@@ -105,38 +109,114 @@ function GroupDetailPage() {
         )}
       </div>
 
-      <BuddiesSection
+      <BuddiesAndBillsSection
         groupId={id}
         members={group.members}
         isCreator={isCreator}
         currentUserId={currentUser?.id}
         onRemove={handleRemoveMember}
+        bills={bills}
       />
 
-      <BalancesSection groupId={id} balances={balances ?? []} members={group.members} />
+      <PayerSection
+        groupId={id}
+        members={group.members}
+        payerId={group.payer_id}
+        payer={group.payer}
+        isCreator={isCreator}
+      />
 
-      <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-sm font-semibold text-ink">Bills</h2>
-        <div className="mt-3 flex flex-col gap-2">
-          {bills?.length === 0 && <p className="text-sm text-slate-500">No bills in this group yet.</p>}
-          {bills?.map((bill) => (
-            <Link
-              key={bill.id}
-              to="/bills/$billId"
-              params={{ billId: String(bill.id) }}
-              className="flex items-center justify-between rounded-lg border border-slate-100 px-3 py-2 text-sm transition hover:border-brand-200"
-            >
-              <span className="text-ink">{bill.merchant_name ?? 'Receipt'}</span>
-              <span className="font-medium text-slate-700">{money(bill.total)}</span>
-            </Link>
-          ))}
-        </div>
-      </div>
+      <BalancesSection
+        groupId={id}
+        balances={balances ?? []}
+        payerId={group.payer_id}
+        myMemberId={myMemberId}
+        payerName={group.payer?.name}
+      />
+
     </main>
   )
 }
 
-function BuddiesSection({
+function BuddiesAndBillsSection({
+  groupId,
+  members,
+  isCreator,
+  currentUserId,
+  onRemove,
+  bills,
+}: {
+  groupId: number
+  members: { id: number; name: string; user_id: number | null }[]
+  isCreator: boolean
+  currentUserId: number | undefined
+  onRemove: (memberId: number, name: string) => void
+  bills: { id: number; merchant_name: string | null; total: number }[] | undefined
+}) {
+  const [tab, setTab] = useState<'buddies' | 'bills'>('buddies')
+
+  return (
+    <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="flex justify-center">
+        <div className="inline-flex rounded-full bg-slate-100 p-1">
+          <button
+            type="button"
+            onClick={() => setTab('buddies')}
+            className={`rounded-full px-5 py-1.5 text-sm font-medium transition ${
+              tab === 'buddies' ? 'bg-white text-ink shadow-sm' : 'text-slate-400 hover:text-slate-500'
+            }`}
+          >
+            Buddies
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab('bills')}
+            className={`rounded-full px-5 py-1.5 text-sm font-medium transition ${
+              tab === 'bills' ? 'bg-white text-ink shadow-sm' : 'text-slate-400 hover:text-slate-500'
+            }`}
+          >
+            Bills
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-4">
+        {tab === 'buddies' ? (
+          <BuddiesPanel
+            groupId={groupId}
+            members={members}
+            isCreator={isCreator}
+            currentUserId={currentUserId}
+            onRemove={onRemove}
+          />
+        ) : (
+          <BillsPanel bills={bills} />
+        )}
+      </div>
+    </div>
+  )
+}
+
+function BillsPanel({ bills }: { bills: { id: number; merchant_name: string | null; total: number }[] | undefined }) {
+  return (
+    <div className="flex flex-col gap-2">
+      {bills?.length === 0 && <p className="text-sm text-slate-500">No bills in this group yet.</p>}
+      {bills?.map((bill) => (
+        <Link
+          key={bill.id}
+          to="/bills/$billId"
+          params={{ billId: String(bill.id) }}
+          className="flex items-center justify-between rounded-lg border border-slate-100 px-3 py-2 text-sm transition hover:border-brand-200"
+        >
+          <span className="text-ink">{bill.merchant_name ?? 'Receipt'}</span>
+          <span className="font-medium text-slate-700">{money(bill.total)}</span>
+        </Link>
+      ))}
+    </div>
+  )
+}
+
+function BuddiesPanel({
   groupId,
   members,
   isCreator,
@@ -185,10 +265,8 @@ function BuddiesSection({
   }
 
   return (
-    <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h2 className="text-sm font-semibold text-ink">Buddies</h2>
-
-      <div className="mt-3 flex flex-col gap-2">
+    <div>
+      <div className="flex flex-col gap-2">
         {members.map((member) => (
           <div key={member.id} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
             <span className="text-sm text-slate-800">{member.name}</span>
@@ -273,54 +351,208 @@ function BuddiesSection({
   )
 }
 
-function BalancesSection({
+function PayerSection({
   groupId,
-  balances,
   members,
+  payerId,
+  payer,
+  isCreator,
 }: {
   groupId: number
-  balances: { group_member_id: number; name: string; balance: number }[]
   members: { id: number; name: string }[]
+  payerId: number | null
+  payer: { name: string; user: { bank_name: string | null; bank_account_number: string | null } | null } | null
+  isCreator: boolean
 }) {
-  const [isSettling, setIsSettling] = useState(false)
-  const { data: settlements } = useSettlements(groupId)
+  const [isEditing, setIsEditing] = useState(false)
 
   return (
     <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-ink">Balances</h2>
-        <button
-          type="button"
-          onClick={() => setIsSettling((open) => !open)}
-          className="text-sm font-medium text-brand-600 hover:text-brand-700"
-        >
-          {isSettling ? 'Cancel' : 'Settle up'}
-        </button>
+        <div>
+          <h2 className="text-sm font-semibold text-ink">Payer</h2>
+          <p className="mt-1 text-xs text-slate-500">Everyone in this group pays their share to whoever is set here.</p>
+        </div>
+
+        {isCreator && (
+          <button
+            type="button"
+            onClick={() => setIsEditing(true)}
+            aria-label="Edit payer"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-ink"
+          >
+            <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+              <path d="M13.586 3.586a2 2 0 1 1 2.828 2.828l-8.5 8.5a1 1 0 0 1-.464.263l-3 .75a.5.5 0 0 1-.606-.606l.75-3a1 1 0 0 1 .263-.464l8.5-8.5a2 2 0 0 1 .229-.271Z" />
+            </svg>
+          </button>
+        )}
       </div>
+
+      {payer ? (
+        <div className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-sm">
+          <p className="text-ink">
+            Pay <span className="font-medium">{payer.name}</span>
+          </p>
+          {payer.user?.bank_name || payer.user?.bank_account_number ? (
+            <p className="mt-1 text-xs text-slate-500">
+              {payer.user.bank_name} {payer.user.bank_account_number && `— ${payer.user.bank_account_number}`}
+            </p>
+          ) : (
+            <p className="mt-1 text-xs text-slate-400">No bank details added yet.</p>
+          )}
+        </div>
+      ) : (
+        <p className="mt-3 text-sm text-slate-500">
+          {isCreator ? 'No payer set yet — tap the pencil to choose one.' : 'No payer has been set for this group yet.'}
+        </p>
+      )}
+
+      {isEditing && (
+        <EditPayerModal
+          groupId={groupId}
+          members={members}
+          payerId={payerId}
+          onClose={() => setIsEditing(false)}
+        />
+      )}
+    </div>
+  )
+}
+
+function EditPayerModal({
+  groupId,
+  members,
+  payerId,
+  onClose,
+}: {
+  groupId: number
+  members: { id: number; name: string }[]
+  payerId: number | null
+  onClose: () => void
+}) {
+  const updateGroup = useUpdateGroup(groupId)
+  const [selected, setSelected] = useState<number | ''>(payerId ?? '')
+
+  function handleSave() {
+    updateGroup.mutate({ payer_id: selected === '' ? null : selected }, { onSuccess: onClose })
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 p-4">
+      <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-ink">Edit payer</h3>
+          <button type="button" onClick={onClose} className="text-sm text-slate-400 hover:text-slate-600">
+            Close
+          </button>
+        </div>
+
+        <select
+          value={selected}
+          onChange={(e) => setSelected(e.target.value ? Number(e.target.value) : '')}
+          className="mt-4 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-500"
+        >
+          <option value="">No payer set</option>
+          {members.map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.name}
+            </option>
+          ))}
+        </select>
+
+        <div className="mt-4 flex justify-end gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={updateGroup.isPending}
+            className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {updateGroup.isPending ? 'Saving…' : 'Save'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function BalancesSection({
+  groupId,
+  balances,
+  payerId,
+  myMemberId,
+  payerName,
+}: {
+  groupId: number
+  balances: {
+    group_member_id: number
+    name: string
+    balance: number
+    gross_balance: number
+    is_payer: boolean
+    status: 'pending' | 'paid'
+  }[]
+  payerId: number | null
+  myMemberId: number | undefined
+  payerName: string | undefined
+}) {
+  const { data: settlements } = useSettlements(groupId)
+  const createSettlement = useCreateSettlement(groupId)
+
+  function handlePay(b: { group_member_id: number; name: string; balance: number }) {
+    if (!payerId) return
+    const amount = Math.abs(b.balance)
+    const isSelf = b.group_member_id === myMemberId
+    const message = isSelf
+      ? `Pay ${money(amount)} to ${payerName ?? 'the payer'}?`
+      : `Mark ${b.name} as paid ${money(amount)}?`
+    if (!confirm(message)) return
+    createSettlement.mutate({ paidBy: b.group_member_id, paidTo: payerId, amount })
+  }
+
+  return (
+    <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h2 className="text-sm font-semibold text-ink">Balances</h2>
 
       <div className="mt-3 flex flex-col gap-1.5">
-        {balances.map((b) => (
-          <Link
-            key={b.group_member_id}
-            to="/groups/$groupId/members/$memberId"
-            params={{ groupId: String(groupId), memberId: String(b.group_member_id) }}
-            className="flex items-center justify-between rounded-lg px-2 py-1 text-sm transition hover:bg-slate-50"
-          >
-            <span className="text-slate-700">{b.name}</span>
-            <span
-              className={
-                b.balance > 0 ? 'font-medium text-brand-600' : b.balance < 0 ? 'font-medium text-error-600' : 'text-slate-500'
-              }
-            >
-              {b.balance > 0 ? `+${money(b.balance)}` : money(b.balance)}
-            </span>
-          </Link>
-        ))}
-      </div>
+        {balances.map((b) => {
+          const canMarkPaid =
+            !b.is_payer && b.status === 'pending' && payerId && (b.group_member_id === myMemberId || myMemberId === payerId)
 
-      {isSettling && (
-        <SettleUpForm groupId={groupId} members={members} balances={balances} onDone={() => setIsSettling(false)} />
-      )}
+          return (
+            <div key={b.group_member_id} className="flex items-center justify-between gap-2 rounded-lg px-2 py-1 text-sm">
+              <Link
+                to="/groups/$groupId/members/$memberId"
+                params={{ groupId: String(groupId), memberId: String(b.group_member_id) }}
+                className="flex flex-1 items-center gap-2 transition hover:text-brand-700"
+              >
+                <span className="text-slate-700">{b.name}</span>
+                {b.is_payer && <CollectorBadge isPayer />}
+              </Link>
+
+              {!b.is_payer &&
+                (b.status === 'paid' || canMarkPaid ? (
+                  <PaidStamp
+                    isPaid={b.status === 'paid'}
+                    canMark={Boolean(canMarkPaid)}
+                    onMarkPaid={() => handlePay(b)}
+                    pending={createSettlement.isPending}
+                  />
+                ) : (
+                  <span className="rounded-full bg-error-50 px-2 py-0.5 text-xs font-medium text-error-600">Pending</span>
+                ))}
+
+              <span className="text-slate-500">{money(Math.abs(b.gross_balance))}</span>
+            </div>
+          )
+        })}
+      </div>
 
       {settlements && settlements.length > 0 && (
         <div className="mt-4 border-t border-slate-100 pt-3">
@@ -334,101 +566,6 @@ function BalancesSection({
           </div>
         </div>
       )}
-    </div>
-  )
-}
-
-function SettleUpForm({
-  groupId,
-  members,
-  balances,
-  onDone,
-}: {
-  groupId: number
-  members: { id: number; name: string }[]
-  balances: { group_member_id: number; balance: number }[]
-  onDone: () => void
-}) {
-  const createSettlement = useCreateSettlement(groupId)
-
-  const suggestion = useMemo(() => {
-    const debtor = [...balances].sort((a, b) => a.balance - b.balance)[0]
-    const creditor = [...balances].sort((a, b) => b.balance - a.balance)[0]
-    if (!debtor || !creditor || debtor.balance >= 0 || creditor.balance <= 0) return null
-    return {
-      paidBy: debtor.group_member_id,
-      paidTo: creditor.group_member_id,
-      amount: Math.min(Math.abs(debtor.balance), creditor.balance),
-    }
-  }, [balances])
-
-  const [paidBy, setPaidBy] = useState<number | ''>(suggestion?.paidBy ?? '')
-  const [paidTo, setPaidTo] = useState<number | ''>(suggestion?.paidTo ?? '')
-  const [amount, setAmount] = useState(suggestion ? String(suggestion.amount.toFixed(2)) : '')
-
-  function handleSubmit() {
-    if (!paidBy || !paidTo || paidBy === paidTo || !amount || Number(amount) <= 0) return
-    createSettlement.mutate(
-      { paidBy, paidTo, amount: Number(amount) },
-      { onSuccess: onDone },
-    )
-  }
-
-  return (
-    <div className="mt-4 flex flex-col gap-3 rounded-xl border border-brand-100 bg-brand-50/50 p-4">
-      <div className="grid grid-cols-2 gap-3">
-        <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
-          Paid by
-          <select
-            value={paidBy}
-            onChange={(e) => setPaidBy(e.target.value ? Number(e.target.value) : '')}
-            className="rounded-lg border border-slate-300 px-2 py-1.5 text-sm outline-none focus:border-brand-500"
-          >
-            <option value="">Select…</option>
-            {members.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
-          Paid to
-          <select
-            value={paidTo}
-            onChange={(e) => setPaidTo(e.target.value ? Number(e.target.value) : '')}
-            className="rounded-lg border border-slate-300 px-2 py-1.5 text-sm outline-none focus:border-brand-500"
-          >
-            <option value="">Select…</option>
-            {members.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-
-      <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
-        Amount
-        <input
-          type="number"
-          min="0.01"
-          step="0.01"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          className="rounded-lg border border-slate-300 px-2 py-1.5 text-sm outline-none focus:border-brand-500"
-        />
-      </label>
-
-      <button
-        type="button"
-        onClick={handleSubmit}
-        disabled={createSettlement.isPending}
-        className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        {createSettlement.isPending ? 'Recording…' : 'Record settlement'}
-      </button>
     </div>
   )
 }

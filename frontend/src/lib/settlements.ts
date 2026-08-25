@@ -47,6 +47,7 @@ export function useCreateSettlement(groupId: number) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: settlementKeys.list(groupId) })
       queryClient.invalidateQueries({ queryKey: groupKeys.balances(groupId) })
+      queryClient.invalidateQueries({ queryKey: ['balances', 'user'] })
     },
   })
 }

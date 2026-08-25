@@ -6,6 +6,10 @@ export type GroupBalance = {
   group_name: string
   group_member_id: number
   balance: number
+  status: 'pending' | 'paid'
+  is_payer: boolean
+  payer_id: number | null
+  payer_name: string | null
 }
 
 export type UserBalances = {

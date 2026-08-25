@@ -44,9 +44,13 @@ export function Navbar() {
         {/* Desktop */}
         <div className="hidden items-center gap-2 md:flex">
           <NotificationsBell />
-          <span className="mx-1 flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-sm font-medium text-brand-700">
+          <Link
+            to="/settings"
+            aria-label="Settings"
+            className="mx-1 flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-sm font-medium text-brand-700 transition hover:bg-brand-200"
+          >
             {initial}
-          </span>
+          </Link>
           <button
             type="button"
             onClick={handleLogout}
@@ -101,12 +105,16 @@ export function Navbar() {
                 </Link>
               ))}
             </nav>
-            <div className="mt-6 flex items-center gap-2 border-t border-slate-100 pt-4">
+            <Link
+              to="/settings"
+              onClick={() => setIsMenuOpen(false)}
+              className="mt-6 flex items-center gap-2 border-t border-slate-100 pt-4"
+            >
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-sm font-medium text-brand-700">
                 {initial}
               </span>
               <span className="text-sm font-medium text-slate-700">{user?.name}</span>
-            </div>
+            </Link>
             <button
               type="button"
               onClick={handleLogout}

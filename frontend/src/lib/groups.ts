@@ -17,6 +17,8 @@ export type Group = {
   created_by: number
   members: GroupMember[]
   members_count?: number
+  payer_id: number | null
+  payer: GroupMember | null
 }
 
 export type GroupBalance = {
@@ -24,6 +26,9 @@ export type GroupBalance = {
   user_id: number | null
   name: string
   balance: number
+  gross_balance: number
+  is_payer: boolean
+  status: 'pending' | 'paid'
 }
 
 export type GroupMemberBill = {
@@ -116,8 +121,8 @@ export function useUpdateGroup(groupId: number) {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (name: string) => {
-      const { data } = await api.put<{ data: Group }>(`/groups/${groupId}`, { name })
+    mutationFn: async (payload: { name?: string; payer_id?: number | null }) => {
+      const { data } = await api.put<{ data: Group }>(`/groups/${groupId}`, payload)
       return data.data
     },
     onSuccess: () => {

@@ -1,12 +1,13 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
+import { CollectorBadge } from '@/components/CollectorBadge'
 import { ItemAssignmentRow } from '@/components/ItemAssignmentRow'
 import { money } from '@/lib/format'
 import { parseApiError } from '@/lib/api'
 import { useCurrentUser } from '@/lib/auth'
 import { useAddBillParticipant, useBill, useConfirmBill, useRemoveBillParticipant, useRetryExtraction } from '@/lib/bills'
 import { useBuddies } from '@/lib/buddies'
-import { useAddGroupMember, useGroup, useRemoveGroupMember } from '@/lib/groups'
+import { useAddGroupMember, useGroup, useRemoveGroupMember, useUpdateGroup } from '@/lib/groups'
 
 export const Route = createFileRoute('/_authenticated/bills/$billId')({
   component: BillReviewPage,
@@ -26,6 +27,7 @@ function BillReviewPage() {
   const addParticipant = useAddBillParticipant(bill?.id)
   const removeParticipant = useRemoveBillParticipant(bill?.id)
   const removeGroupMember = useRemoveGroupMember(bill?.group_id ?? 0)
+  const updateGroup = useUpdateGroup(bill?.group_id ?? 0)
 
   const isGroupCreator = group?.created_by === currentUser?.id
 
@@ -74,6 +76,10 @@ function BillReviewPage() {
     if (!confirm(`Remove ${memberName} from this group? This removes them from every bill in this group.`)) return
     setBuddyError(null)
     removeGroupMember.mutate(memberId, { onError: (err) => setBuddyError(parseApiError(err).message) })
+  }
+
+  function handleSetPayer(memberId: number) {
+    updateGroup.mutate({ payer_id: memberId })
   }
 
   const participantIds = new Set(bill?.participants.map((p) => p.id))
@@ -179,6 +185,12 @@ function BillReviewPage() {
                   className="flex items-center gap-1.5 rounded-full bg-brand-100 py-1 pl-3 pr-1.5 text-xs font-medium text-brand-700"
                 >
                   {member.name}
+                  <CollectorBadge
+                    isPayer={group?.payer_id === member.id}
+                    canSet={isGroupCreator}
+                    onSetPayer={() => handleSetPayer(member.id)}
+                    pending={updateGroup.isPending}
+                  />
                   <button
                     type="button"
                     onClick={() => handleRemoveParticipant(member.id)}
