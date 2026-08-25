@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { HomeStackParamList } from '../navigation/HomeStack';
 import {
@@ -22,9 +22,11 @@ import { Button } from '../components/Button';
 import { TextField } from '../components/TextField';
 import { SelectField } from '../components/SelectField';
 import { Avatar } from '../components/Avatar';
+import { CollectorBadge } from '../components/CollectorBadge';
+import { PaidStamp } from '../components/PaidStamp';
 import { EditIcon } from '../components/icons';
 import { money } from '../utils/format';
-import type { GroupBalance, GroupMember } from '../types/models';
+import type { Bill, GroupBalance, GroupMember } from '../types/models';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'GroupDetail'>;
 
@@ -85,6 +87,8 @@ export default function GroupDetailScreen({ route, navigation }: Props) {
     );
   }
 
+  const myMemberId = group.members.find((m) => m.user_id === currentUser?.id)?.id;
+
   return (
     <ScrollView className="flex-1 bg-white px-6" contentContainerClassName="pt-16 pb-28">
       <ScreenHeader
@@ -113,28 +117,24 @@ export default function GroupDetailScreen({ route, navigation }: Props) {
         />
       )}
 
-      <BuddiesSection groupId={groupId} members={group.members} isCreator={isCreator} onRemove={handleRemoveMember} />
+      <BuddiesAndBillsSection
+        groupId={groupId}
+        members={group.members}
+        isCreator={isCreator}
+        onRemove={handleRemoveMember}
+        bills={bills}
+        onPressBill={(billId) => navigation.navigate('BillDetail', { billId })}
+      />
 
-      <BalancesSection groupId={groupId} balances={balances ?? []} members={group.members} />
+      <PayerSection groupId={groupId} members={group.members} payerId={group.payer_id} payer={group.payer} isCreator={isCreator} />
 
-      <Card className="mt-6">
-        <Text className="text-sm font-semibold text-gray-900">Bills</Text>
-        <View className="mt-3 gap-2">
-          {bills?.length === 0 && <Text className="text-sm text-gray-500">No bills in this group yet.</Text>}
-          {bills?.map((bill) => (
-            <TouchableOpacity
-              key={bill.id}
-              onPress={() => navigation.navigate('BillDetail', { billId: bill.id })}
-              className="flex-row items-center justify-between rounded-lg border border-gray-100 px-3 py-2.5"
-            >
-              <Text className="flex-1 text-sm text-gray-900" numberOfLines={1}>
-                {bill.merchant_name ?? 'Receipt'}
-              </Text>
-              <Text className="text-sm font-medium text-gray-700">{money(bill.total)}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </Card>
+      <BalancesSection
+        groupId={groupId}
+        balances={balances ?? []}
+        payerId={group.payer_id}
+        myMemberId={myMemberId}
+        payerName={group.payer?.name}
+      />
 
       {isCreator && (
         <TouchableOpacity onPress={handleDeleteGroup} className="mt-6 items-center rounded-xl border border-red-200 bg-red-50 py-3">
@@ -145,7 +145,76 @@ export default function GroupDetailScreen({ route, navigation }: Props) {
   );
 }
 
-function BuddiesSection({
+function BuddiesAndBillsSection({
+  groupId,
+  members,
+  isCreator,
+  onRemove,
+  bills,
+  onPressBill,
+}: {
+  groupId: number;
+  members: GroupMember[];
+  isCreator: boolean;
+  onRemove: (member: GroupMember) => void;
+  bills: Bill[] | undefined;
+  onPressBill: (billId: number) => void;
+}) {
+  const [tab, setTab] = useState<'buddies' | 'bills'>('buddies');
+
+  return (
+    <Card className="mt-6">
+      <View className="flex-row justify-center">
+        <View className="flex-row rounded-full bg-gray-100 p-1">
+          <TouchableOpacity
+            onPress={() => setTab('buddies')}
+            style={tab === 'buddies' ? { shadowColor: '#111827', shadowOpacity: 0.06, shadowRadius: 4, shadowOffset: { width: 0, height: 1 }, elevation: 1 } : undefined}
+            className={`rounded-full px-5 py-1.5 ${tab === 'buddies' ? 'bg-white' : ''}`}
+          >
+            <Text className={`text-sm font-medium ${tab === 'buddies' ? 'text-gray-900' : 'text-gray-400'}`}>Buddies</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setTab('bills')}
+            style={tab === 'bills' ? { shadowColor: '#111827', shadowOpacity: 0.06, shadowRadius: 4, shadowOffset: { width: 0, height: 1 }, elevation: 1 } : undefined}
+            className={`rounded-full px-5 py-1.5 ${tab === 'bills' ? 'bg-white' : ''}`}
+          >
+            <Text className={`text-sm font-medium ${tab === 'bills' ? 'text-gray-900' : 'text-gray-400'}`}>Bills</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View className="mt-4">
+        {tab === 'buddies' ? (
+          <BuddiesPanel groupId={groupId} members={members} isCreator={isCreator} onRemove={onRemove} />
+        ) : (
+          <BillsPanel bills={bills} onPressBill={onPressBill} />
+        )}
+      </View>
+    </Card>
+  );
+}
+
+function BillsPanel({ bills, onPressBill }: { bills: Bill[] | undefined; onPressBill: (billId: number) => void }) {
+  return (
+    <View className="gap-2">
+      {bills?.length === 0 && <Text className="text-sm text-gray-500">No bills in this group yet.</Text>}
+      {bills?.map((bill) => (
+        <TouchableOpacity
+          key={bill.id}
+          onPress={() => onPressBill(bill.id)}
+          className="flex-row items-center justify-between rounded-lg border border-gray-100 px-3 py-2.5"
+        >
+          <Text className="flex-1 text-sm text-gray-900" numberOfLines={1}>
+            {bill.merchant_name ?? 'Receipt'}
+          </Text>
+          <Text className="text-sm font-medium text-gray-700">{money(bill.total)}</Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
+}
+
+function BuddiesPanel({
   groupId,
   members,
   isCreator,
@@ -186,10 +255,8 @@ function BuddiesSection({
   }
 
   return (
-    <Card className="mt-6">
-      <Text className="text-sm font-semibold text-gray-900">Buddies</Text>
-
-      <View className="mt-3 gap-2">
+    <View>
+      <View className="gap-2">
         {members.map((member) => (
           <View key={member.id} className="flex-row items-center justify-between rounded-lg bg-gray-50 px-3 py-2">
             <View className="flex-row items-center gap-2">
@@ -248,45 +315,184 @@ function BuddiesSection({
           </TouchableOpacity>
         </View>
       )}
+    </View>
+  );
+}
+
+function PayerSection({
+  groupId,
+  members,
+  payerId,
+  payer,
+  isCreator,
+}: {
+  groupId: number;
+  members: GroupMember[];
+  payerId: number | null;
+  payer: GroupMember | null;
+  isCreator: boolean;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+
+  return (
+    <Card className="mt-6">
+      <View className="flex-row items-start justify-between">
+        <View className="flex-1">
+          <Text className="text-sm font-semibold text-gray-900">Payer</Text>
+          <Text className="mt-1 text-xs text-gray-500">Everyone in this group pays their share to whoever is set here.</Text>
+        </View>
+
+        {isCreator && (
+          <TouchableOpacity
+            onPress={() => setIsEditing(true)}
+            accessibilityLabel="Edit payer"
+            className="h-8 w-8 items-center justify-center rounded-full bg-gray-50"
+          >
+            <EditIcon size={15} />
+          </TouchableOpacity>
+        )}
+      </View>
+
+      {payer ? (
+        <View className="mt-3 rounded-lg bg-gray-50 px-3 py-2">
+          <Text className="text-sm text-gray-900">
+            Pay <Text className="font-medium">{payer.name}</Text>
+          </Text>
+          {payer.user?.bank_name || payer.user?.bank_account_number ? (
+            <Text className="mt-1 text-xs text-gray-500">
+              {payer.user.bank_name} {payer.user.bank_account_number ? `— ${payer.user.bank_account_number}` : ''}
+            </Text>
+          ) : (
+            <Text className="mt-1 text-xs text-gray-400">No bank details added yet.</Text>
+          )}
+        </View>
+      ) : (
+        <Text className="mt-3 text-sm text-gray-500">
+          {isCreator ? 'No payer set yet — tap the pencil to choose one.' : 'No payer has been set for this group yet.'}
+        </Text>
+      )}
+
+      <EditPayerModal visible={isEditing} groupId={groupId} members={members} payerId={payerId} onClose={() => setIsEditing(false)} />
     </Card>
+  );
+}
+
+function EditPayerModal({
+  visible,
+  groupId,
+  members,
+  payerId,
+  onClose,
+}: {
+  visible: boolean;
+  groupId: number;
+  members: GroupMember[];
+  payerId: number | null;
+  onClose: () => void;
+}) {
+  const [updateGroup, { isLoading }] = useUpdateGroupMutation();
+  const [selected, setSelected] = useState<number>(payerId ?? 0);
+
+  function handleOpenChange(next: boolean) {
+    if (next) setSelected(payerId ?? 0);
+  }
+
+  async function handleSave() {
+    await updateGroup({ groupId, payer_id: selected === 0 ? null : selected }).unwrap();
+    onClose();
+  }
+
+  const options = [{ label: 'No payer set', value: 0 }, ...members.map((m) => ({ label: m.name, value: m.id }))];
+
+  return (
+    <Modal visible={visible} transparent animationType="fade" onShow={() => handleOpenChange(true)} onRequestClose={onClose}>
+      <View className="flex-1 items-center justify-center bg-gray-900/40 p-4">
+        <View className="w-full max-w-sm rounded-2xl bg-white p-5">
+          <View className="flex-row items-center justify-between">
+            <Text className="text-sm font-semibold text-gray-900">Edit payer</Text>
+            <TouchableOpacity onPress={onClose}>
+              <Text className="text-sm text-gray-400">Close</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View className="mt-4">
+            <SelectField options={options} value={selected} onChange={setSelected} />
+          </View>
+
+          <View className="mt-4 flex-row justify-end gap-2">
+            <TouchableOpacity onPress={onClose} className="items-center justify-center rounded-xl px-4 py-3">
+              <Text className="text-sm font-medium text-gray-500">Cancel</Text>
+            </TouchableOpacity>
+            <Button label={isLoading ? 'Saving…' : 'Save'} onPress={handleSave} loading={isLoading} className="px-5" />
+          </View>
+        </View>
+      </View>
+    </Modal>
   );
 }
 
 function BalancesSection({
   groupId,
   balances,
-  members,
+  payerId,
+  myMemberId,
+  payerName,
 }: {
   groupId: number;
   balances: GroupBalance[];
-  members: GroupMember[];
+  payerId: number | null;
+  myMemberId: number | undefined;
+  payerName: string | undefined;
 }) {
-  const [isSettling, setIsSettling] = useState(false);
   const { data: settlements } = useGetSettlementsQuery(groupId);
+  const [createSettlement, { isLoading: isPaying }] = useCreateSettlementMutation();
+
+  function handlePay(b: GroupBalance) {
+    if (!payerId) return;
+    const amount = Math.abs(b.balance);
+    const isSelf = b.group_member_id === myMemberId;
+
+    Alert.alert(
+      isSelf ? 'Pay' : 'Mark as paid',
+      isSelf ? `Pay ${money(amount)} to ${payerName ?? 'the payer'}?` : `Mark ${b.name} as paid ${money(amount)}?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: isSelf ? 'Pay' : 'Mark paid',
+          onPress: () => createSettlement({ groupId, paidBy: b.group_member_id, paidTo: payerId, amount }),
+        },
+      ],
+    );
+  }
 
   return (
     <Card className="mt-6">
-      <View className="flex-row items-center justify-between">
-        <Text className="text-sm font-semibold text-gray-900">Balances</Text>
-        <TouchableOpacity onPress={() => setIsSettling((open) => !open)}>
-          <Text className="text-sm font-medium text-teal-600">{isSettling ? 'Cancel' : 'Settle up'}</Text>
-        </TouchableOpacity>
-      </View>
+      <Text className="text-sm font-semibold text-gray-900">Balances</Text>
 
-      <View className="mt-3 gap-1.5">
-        {balances.map((b) => (
-          <View key={b.group_member_id} className="flex-row items-center justify-between">
-            <Text className="text-sm text-gray-700">{b.name}</Text>
-            <Text
-              className={`text-sm ${b.balance > 0 ? 'font-medium text-emerald-500' : b.balance < 0 ? 'font-medium text-red-500' : 'text-gray-500'}`}
-            >
-              {b.balance > 0 ? `+${money(b.balance)}` : money(b.balance)}
-            </Text>
-          </View>
-        ))}
-      </View>
+      <View className="mt-3 gap-2">
+        {balances.map((b) => {
+          const canMarkPaid = !b.is_payer && b.status === 'pending' && payerId && (b.group_member_id === myMemberId || myMemberId === payerId);
 
-      {isSettling && <SettleUpForm groupId={groupId} members={members} balances={balances} onDone={() => setIsSettling(false)} />}
+          return (
+            <View key={b.group_member_id} className="flex-row items-center justify-between gap-2">
+              <View className="flex-1 flex-row items-center gap-2">
+                <Text className="text-sm text-gray-700">{b.name}</Text>
+                {b.is_payer ? (
+                  <CollectorBadge isPayer />
+                ) : b.status === 'paid' || canMarkPaid ? (
+                  <PaidStamp isPaid={b.status === 'paid'} canMark={Boolean(canMarkPaid)} onMarkPaid={() => handlePay(b)} pending={isPaying} />
+                ) : (
+                  <View className="rounded-full bg-red-50 px-2 py-0.5">
+                    <Text className="text-xs font-medium text-red-500">Pending</Text>
+                  </View>
+                )}
+              </View>
+
+              <Text className="text-sm text-gray-500">{money(Math.abs(b.gross_balance))}</Text>
+            </View>
+          );
+        })}
+      </View>
 
       {settlements && settlements.length > 0 && (
         <View className="mt-4 border-t border-gray-100 pt-3">
@@ -301,59 +507,5 @@ function BalancesSection({
         </View>
       )}
     </Card>
-  );
-}
-
-function SettleUpForm({
-  groupId,
-  members,
-  balances,
-  onDone,
-}: {
-  groupId: number;
-  members: GroupMember[];
-  balances: GroupBalance[];
-  onDone: () => void;
-}) {
-  const [createSettlement, { isLoading }] = useCreateSettlementMutation();
-
-  const suggestion = useMemo(() => {
-    const debtor = [...balances].sort((a, b) => a.balance - b.balance)[0];
-    const creditor = [...balances].sort((a, b) => b.balance - a.balance)[0];
-    if (!debtor || !creditor || debtor.balance >= 0 || creditor.balance <= 0) return null;
-    return {
-      paidBy: debtor.group_member_id,
-      paidTo: creditor.group_member_id,
-      amount: Math.min(Math.abs(debtor.balance), creditor.balance),
-    };
-  }, [balances]);
-
-  const [paidBy, setPaidBy] = useState<number | undefined>(suggestion?.paidBy);
-  const [paidTo, setPaidTo] = useState<number | undefined>(suggestion?.paidTo);
-  const [amount, setAmount] = useState(suggestion ? suggestion.amount.toFixed(2) : '');
-
-  const memberOptions = members.map((m) => ({ label: m.name, value: m.id }));
-
-  async function handleSubmit() {
-    if (!paidBy || !paidTo || paidBy === paidTo || !amount || Number(amount) <= 0) return
-    await createSettlement({ groupId, paidBy, paidTo, amount: Number(amount) }).unwrap();
-    onDone();
-  }
-
-  return (
-    <View className="mt-4 gap-3 rounded-xl border border-teal-100 bg-teal-50/50 p-4">
-      <View className="flex-row gap-3">
-        <View className="flex-1">
-          <SelectField label="Paid by" options={memberOptions} value={paidBy} onChange={setPaidBy} />
-        </View>
-        <View className="flex-1">
-          <SelectField label="Paid to" options={memberOptions} value={paidTo} onChange={setPaidTo} />
-        </View>
-      </View>
-
-      <TextField label="Amount" value={amount} onChangeText={setAmount} keyboardType="decimal-pad" />
-
-      <Button label="Record settlement" onPress={handleSubmit} loading={isLoading} />
-    </View>
   );
 }

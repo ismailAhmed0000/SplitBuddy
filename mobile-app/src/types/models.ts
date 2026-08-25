@@ -14,6 +14,8 @@ export type Group = {
   created_by: number;
   members: GroupMember[];
   members_count?: number;
+  payer_id: number | null;
+  payer: GroupMember | null;
 };
 
 export type GroupBalance = {
@@ -21,6 +23,9 @@ export type GroupBalance = {
   user_id: number | null;
   name: string;
   balance: number;
+  gross_balance: number;
+  is_payer: boolean;
+  status: 'pending' | 'paid';
 };
 
 export type BillStatus = 'processing' | 'parsed' | 'confirmed' | 'failed';
@@ -85,7 +90,16 @@ export type Settlement = {
 };
 
 export type UserBalances = {
-  groups: { group_id: number; group_name: string; group_member_id: number; balance: number }[];
+  groups: {
+    group_id: number;
+    group_name: string;
+    group_member_id: number;
+    balance: number;
+    status: 'pending' | 'paid';
+    is_payer: boolean;
+    payer_id: number | null;
+    payer_name: string | null;
+  }[];
   overall_balance: number;
 };
 

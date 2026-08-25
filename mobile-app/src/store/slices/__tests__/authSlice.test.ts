@@ -9,6 +9,8 @@ const testUser: User = {
   username: 'alice_tester',
   email: 'alice@example.com',
   phone: null,
+  bank_name: null,
+  bank_account_number: null,
   created_at: '2026-01-01T00:00:00.000Z',
   updated_at: '2026-01-01T00:00:00.000Z',
 };

@@ -5,6 +5,7 @@ import GroupsListScreen from '../screens/GroupsListScreen';
 import GroupDetailScreen from '../screens/GroupDetailScreen';
 import UploadBillScreen from '../screens/UploadBillScreen';
 import BillDetailScreen from '../screens/BillDetailScreen';
+import SettingsScreen from '../screens/SettingsScreen';
 import type { PickedImage } from '../store/api/apiSlice';
 
 export type HomeStackParamList = {
@@ -14,6 +15,7 @@ export type HomeStackParamList = {
   GroupDetail: { groupId: number };
   UploadBill: { initialImage?: PickedImage } | undefined;
   BillDetail: { billId: number };
+  Settings: undefined;
 };
 
 const Stack = createNativeStackNavigator<HomeStackParamList>();
@@ -27,6 +29,7 @@ export function HomeStack() {
       <Stack.Screen name="GroupDetail" component={GroupDetailScreen} />
       <Stack.Screen name="UploadBill" component={UploadBillScreen} />
       <Stack.Screen name="BillDetail" component={BillDetailScreen} />
+      <Stack.Screen name="Settings" component={SettingsScreen} />
     </Stack.Navigator>
   );
 }

@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { User } from '../../types/user';
 
 const TOKEN_KEY = 'splitbuddy_token';
-const USER_KEY = 'splitbuddy_user';
+export const USER_KEY = 'splitbuddy_user';
 
 type AuthState = {
   user: User | null;

@@ -7,6 +7,7 @@
 export { baseApi as api } from './baseApi';
 
 export * from './authApi';
+export * from './usersApi';
 export * from './buddiesApi';
 export * from './groupsApi';
 export * from './billsApi';

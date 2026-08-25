@@ -7,14 +7,17 @@ import {
   useAddGroupMemberMutation,
   useConfirmBillMutation,
   useGetBillQuery,
+  useGetCurrentUserQuery,
   useGetGroupQuery,
   useRetryExtractionMutation,
+  useUpdateGroupMutation,
 } from '../store/api/apiSlice';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { TextField } from '../components/TextField';
-import { Pill, StatusBadge } from '../components/Badge';
+import { StatusBadge } from '../components/Badge';
+import { CollectorBadge } from '../components/CollectorBadge';
 import { CloseIcon, WarningIcon } from '../components/icons';
 import { ItemAssignmentRow } from '../components/ItemAssignmentRow';
 import { money } from '../utils/format';
@@ -29,9 +32,13 @@ export default function BillDetailScreen({ route, navigation }: Props) {
   const [pollingInterval, setPollingInterval] = useState(2000);
   const { data: bill, isLoading } = useGetBillQuery(billId, { pollingInterval });
   const { data: group } = useGetGroupQuery(bill?.group_id ?? 0, { skip: !bill });
+  const { data: currentUser } = useGetCurrentUserQuery();
   const [retryExtraction, { isLoading: isRetrying }] = useRetryExtractionMutation();
   const [confirmBill, { isLoading: isConfirming }] = useConfirmBillMutation();
   const [addMember, { isLoading: isAddingMember }] = useAddGroupMemberMutation();
+  const [updateGroup, { isLoading: isUpdatingGroup }] = useUpdateGroupMutation();
+
+  const isGroupCreator = group?.created_by === currentUser?.id;
 
   const [newMemberName, setNewMemberName] = useState('');
   const [isImageOpen, setIsImageOpen] = useState(false);
@@ -119,7 +126,15 @@ export default function BillDetailScreen({ route, navigation }: Props) {
             <Text className="text-sm font-semibold text-gray-900">Buddies</Text>
             <View className="mt-3 flex-row flex-wrap items-center gap-2">
               {group?.members.map((member) => (
-                <Pill key={member.id} label={member.name} />
+                <View key={member.id} className="flex-row items-center gap-1.5 rounded-full bg-gray-100 py-1 pl-3 pr-2">
+                  <Text className="text-xs font-medium text-gray-700">{member.name}</Text>
+                  <CollectorBadge
+                    isPayer={group?.payer_id === member.id}
+                    canSet={isGroupCreator}
+                    onSetPayer={() => updateGroup({ groupId: bill.group_id, payer_id: member.id })}
+                    pending={isUpdatingGroup}
+                  />
+                </View>
               ))}
             </View>
             <View className="mt-3 flex-row gap-2">

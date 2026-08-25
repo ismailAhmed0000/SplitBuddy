@@ -26,8 +26,8 @@ export const groupsApi = baseApi.injectEndpoints({
       transformResponse: unwrap<Group>,
       invalidatesTags: [{ type: 'Group', id: 'LIST' }],
     }),
-    updateGroup: builder.mutation<Group, { groupId: number; name: string }>({
-      query: ({ groupId, name }) => ({ url: `/groups/${groupId}`, method: 'PUT', body: { name } }),
+    updateGroup: builder.mutation<Group, { groupId: number; name?: string; payer_id?: number | null }>({
+      query: ({ groupId, name, payer_id }) => ({ url: `/groups/${groupId}`, method: 'PUT', body: { name, payer_id } }),
       transformResponse: unwrap<Group>,
       invalidatesTags: (_result, _error, { groupId }) => [
         { type: 'Group', id: groupId },

@@ -5,6 +5,7 @@ import type { HomeStackParamList } from '../navigation/HomeStack';
 import { useCreateGroupMutation, useGetGroupsQuery } from '../store/api/apiSlice';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { EmptyState } from '../components/EmptyState';
+import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { TextField } from '../components/TextField';
 import { ChevronRightIcon, GroupIcon } from '../components/icons';
@@ -34,7 +35,7 @@ export default function GroupsListScreen({ navigation }: Props) {
         onBack={() => navigation.goBack()}
         right={
           !isAdding && (
-            <TouchableOpacity onPress={() => setIsAdding(true)} className="rounded-lg bg-teal-600 px-3.5 py-2">
+            <TouchableOpacity onPress={() => setIsAdding(true)} className="rounded-xl bg-teal-600 px-4 py-2.5">
               <Text className="text-sm font-semibold text-white">New</Text>
             </TouchableOpacity>
           )
@@ -57,10 +58,9 @@ export default function GroupsListScreen({ navigation }: Props) {
       )}
 
       <FlatList
-        className="mt-6"
         data={groups}
         keyExtractor={(item) => String(item.id)}
-        contentContainerClassName="gap-2 pb-28"
+        contentContainerStyle={{ paddingTop: 40, gap: 16, paddingBottom: 112 }}
         ListEmptyComponent={
           !isLoading ? <EmptyState title="You're not in any groups yet." /> : undefined
         }
@@ -72,17 +72,19 @@ export default function GroupsListScreen({ navigation }: Props) {
 
 function GroupRow({ group, onPress }: { group: Group; onPress: () => void }) {
   return (
-    <TouchableOpacity onPress={onPress} className="flex-row items-center justify-between rounded-xl border border-gray-200 bg-white p-4">
-      <View className="flex-row items-center gap-3">
-        <View className="h-10 w-10 items-center justify-center rounded-full bg-teal-100">
-          <GroupIcon size={19} color="#0D9488" />
+    <TouchableOpacity onPress={onPress}>
+      <Card className="flex-row items-center justify-between">
+        <View className="flex-row items-center gap-3">
+          <View className="h-10 w-10 items-center justify-center rounded-full bg-teal-100">
+            <GroupIcon size={19} color="#0D9488" />
+          </View>
+          <View>
+            <Text className="text-sm font-medium text-gray-900">{group.name}</Text>
+            <Text className="mt-1 text-xs text-gray-500">{group.members_count ?? group.members?.length ?? 0} buddies</Text>
+          </View>
         </View>
-        <View>
-          <Text className="text-sm font-medium text-gray-900">{group.name}</Text>
-          <Text className="mt-0.5 text-xs text-gray-500">{group.members_count ?? group.members?.length ?? 0} buddies</Text>
-        </View>
-      </View>
-      <ChevronRightIcon size={18} color="#D1D5DB" />
+        <ChevronRightIcon size={18} color="#D1D5DB" />
+      </Card>
     </TouchableOpacity>
   );
 }

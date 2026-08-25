@@ -6,8 +6,10 @@ import { useAppSelector } from '../store/hooks';
 import { useGetCurrentUserQuery, useGetNotificationsQuery, useGetUserBalancesQuery } from '../store/api/apiSlice';
 import { requestNotificationPermission, setupPushNotifications } from '../services/pushNotifications';
 import { pickBillImage } from '../utils/pickImage';
-import { BellIcon } from '../components/icons';
+import { BellIcon, ChevronRightIcon, GroupIcon } from '../components/icons';
 import { UploadBillCard } from '../components/UploadBillCard';
+import { Avatar } from '../components/Avatar';
+import { Card } from '../components/Card';
 import { money } from '../utils/format';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'HomeMain'>;
@@ -53,16 +55,21 @@ export default function HomeScreen({ navigation }: Props) {
           <Text className="text-2xl font-semibold text-gray-900">Hello {displayUser?.name ?? 'there'}</Text>
           <Text className="mt-1 text-sm text-gray-500">@{displayUser?.username}</Text>
         </View>
-        <TouchableOpacity
-          onPress={() => navigation.navigate('Notifications')}
-          accessibilityLabel="Notifications"
-          className="h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm"
-        >
-          <BellIcon size={22} />
-          {unreadCount > 0 && (
-            <View className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-red-500" />
-          )}
-        </TouchableOpacity>
+        <View className="flex-row items-center gap-2">
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Notifications')}
+            accessibilityLabel="Notifications"
+            className="h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm"
+          >
+            <BellIcon size={22} />
+            {unreadCount > 0 && (
+              <View className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-red-500" />
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('Settings')} accessibilityLabel="Settings">
+            <Avatar name={displayUser?.name ?? '?'} size={44} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {balancesLoading ? (
@@ -81,7 +88,22 @@ export default function HomeScreen({ navigation }: Props) {
         </View>
       )}
 
-      <UploadBillCard className="mt-8" onPress={handleUploadPress} />
+      <TouchableOpacity onPress={() => navigation.navigate('GroupsList')} accessibilityLabel="Groups" className="mt-6">
+        <Card className="flex-row items-center justify-between">
+          <View className="flex-row items-center gap-3">
+            <View className="h-10 w-10 items-center justify-center rounded-full bg-teal-100">
+              <GroupIcon size={19} color="#0D9488" />
+            </View>
+            <View>
+              <Text className="text-sm font-semibold text-gray-900">Groups</Text>
+              <Text className="mt-0.5 text-xs text-gray-500">See your groups and balances</Text>
+            </View>
+          </View>
+          <ChevronRightIcon size={18} color="#D1D5DB" />
+        </Card>
+      </TouchableOpacity>
+
+      <UploadBillCard className="mt-6" onPress={handleUploadPress} />
     </ScrollView>
   );
 }
