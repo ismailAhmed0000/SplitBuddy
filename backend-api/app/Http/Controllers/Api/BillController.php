@@ -40,6 +40,14 @@ class BillController extends Controller
 
         $this->authorizeMembership($group, $request->user()->id);
 
+        if ($group->payer_id === null) {
+            $uploaderMember = $group->members()->where('user_id', $request->user()->id)->first();
+
+            if ($uploaderMember) {
+                $group->update(['payer_id' => $uploaderMember->id]);
+            }
+        }
+
         $file = $request->file('image');
         $path = $file->store('bills', 'public');
 

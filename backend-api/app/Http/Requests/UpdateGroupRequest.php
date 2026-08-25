@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateGroupRequest extends FormRequest
 {
@@ -24,6 +25,10 @@ class UpdateGroupRequest extends FormRequest
     {
         return [
             'name' => ['sometimes', 'required', 'string', 'max:255'],
+            'payer_id' => [
+                'sometimes', 'nullable', 'integer',
+                Rule::exists('group_members', 'id')->where(fn ($query) => $query->where('group_id', $this->route('id'))),
+            ],
         ];
     }
 }

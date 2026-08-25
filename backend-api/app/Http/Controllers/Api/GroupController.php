@@ -44,12 +44,12 @@ class GroupController extends Controller
             'name' => $request->user()->name,
         ]);
 
-        return response()->json(['data' => new GroupResource($group->load('creator', 'members'))], 201);
+        return response()->json(['data' => new GroupResource($group->load('creator', 'members.user', 'payer.user'))], 201);
     }
 
     public function show(Request $request, int $id): GroupResource
     {
-        $group = Group::with('creator', 'members.user')->findOrFail($id);
+        $group = Group::with('creator', 'members.user', 'payer.user')->findOrFail($id);
 
         $this->authorizeMembership($group, $request->user()->id);
 
@@ -64,7 +64,7 @@ class GroupController extends Controller
 
         $group->update($request->validated());
 
-        return new GroupResource($group->load('creator', 'members'));
+        return new GroupResource($group->load('creator', 'members.user', 'payer.user'));
     }
 
     public function destroy(Request $request, int $id): JsonResponse
@@ -124,6 +124,7 @@ class GroupController extends Controller
         $member = $group->members()->findOrFail($memberId);
 
         abort_if($member->user_id === $request->user()->id, 422, 'You cannot remove yourself from the group.');
+        abort_if($member->id === $group->payer_id, 422, 'Reassign the payer before removing them.');
 
         $member->delete();
 

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'created_by'])]
+#[Fillable(['name', 'created_by', 'payer_id'])]
 class Group extends Model
 {
     /**
@@ -16,6 +16,14 @@ class Group extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * @return BelongsTo<GroupMember, $this>
+     */
+    public function payer(): BelongsTo
+    {
+        return $this->belongsTo(GroupMember::class, 'payer_id');
     }
 
     /**

@@ -76,18 +76,30 @@ class BalanceService
             }
         }
 
+        // Snapshot each member's share of the bills before settlements are
+        // applied, so the UI can show a fixed "amount owed" that doesn't
+        // drop to zero once something is marked as paid.
+        $grossBalances = $balances;
+
         foreach ($group->settlements as $settlement) {
             $amount = (float) $settlement->amount;
             $balances[$settlement->paid_by] = ($balances[$settlement->paid_by] ?? 0.0) + $amount;
             $balances[$settlement->paid_to] = ($balances[$settlement->paid_to] ?? 0.0) - $amount;
         }
 
-        return $members->map(fn ($member) => [
-            'group_member_id' => $member->id,
-            'user_id' => $member->user_id,
-            'name' => $member->name,
-            'balance' => round($balances[$member->id] ?? 0.0, 2),
-        ])->values();
+        return $members->map(function ($member) use ($balances, $grossBalances, $group) {
+            $balance = round($balances[$member->id] ?? 0.0, 2);
+
+            return [
+                'group_member_id' => $member->id,
+                'user_id' => $member->user_id,
+                'name' => $member->name,
+                'balance' => $balance,
+                'gross_balance' => round($grossBalances[$member->id] ?? 0.0, 2),
+                'is_payer' => $group->payer_id === $member->id,
+                'status' => $balance < 0 ? 'pending' : 'paid',
+            ];
+        })->values();
     }
 
     /**
@@ -143,7 +155,7 @@ class BalanceService
      */
     public function forUser(User $user): array
     {
-        $memberships = $user->groupMemberships()->with('group')->get();
+        $memberships = $user->groupMemberships()->with('group.payer')->get();
 
         $groups = $memberships->map(function ($membership) {
             $mine = $this->forGroup($membership->group)
@@ -154,6 +166,10 @@ class BalanceService
                 'group_name' => $membership->group->name,
                 'group_member_id' => $membership->id,
                 'balance' => $mine['balance'] ?? 0.0,
+                'status' => $mine['status'] ?? 'paid',
+                'is_payer' => $membership->group->payer_id === $membership->id,
+                'payer_id' => $membership->group->payer_id,
+                'payer_name' => $membership->group->payer?->name,
             ];
         })->values();
 

@@ -35,6 +35,8 @@ class UpdateUserRequest extends FormRequest
                 Rule::unique('users', 'email')->ignore($this->route('id')),
             ],
             'phone' => ['sometimes', 'nullable', 'string', 'max:30'],
+            'bank_name' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'bank_account_number' => ['sometimes', 'nullable', 'string', 'max:64'],
             'password' => ['sometimes', 'required', 'confirmed', Password::defaults()],
         ];
     }
