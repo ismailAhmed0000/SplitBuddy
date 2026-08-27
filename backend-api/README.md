@@ -1,58 +1,65 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SplitBuddy — Backend API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+The Laravel API behind SplitBuddy. Serves the website (`../frontend`) and the mobile app (`../mobile-app`) from one codebase.
 
-## About Laravel
+## Stack
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Laravel 13** on **PHP 8.4**
+- **MySQL** — `DB_CONNECTION=mysql`
+- **Laravel Sanctum** — token-based API auth (bearer tokens, no cookies/sessions for API clients). `POST /login` / `POST /register` issue a token; every other route sits behind `auth:sanctum`.
+- **Anthropic SDK** (`anthropic-ai/sdk`) — powers receipt OCR/parsing in `BillExtractionService`: an uploaded receipt image is sent to Claude, which returns structured merchant/items/totals data.
+- **Pint** — code style (`vendor/bin/pint`)
+- **PHPUnit** — test suite (`php artisan test`)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+No queue workers or scheduled jobs are in use — bill extraction runs synchronously inside the request that uploads the image (`QUEUE_CONNECTION=database` is Laravel's default, but nothing is actually dispatched to it). Mail is not sent anywhere real (`MAIL_MAILER=log`).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Domain model
 
-## Learning Laravel
+- **Users** — `bank_name` / `bank_account_number` are informational only (shown to buddies so they know where to send money) — there's no payment gateway integration anywhere in this app.
+- **Groups** → **GroupMembers** — a group's roster; a member can be a real `User` (`user_id` set) or a name-only buddy who isn't on the app yet. `groups.payer_id` optionally designates one member as the group's "collector" — everyone else's balance is understood to be owed to that person.
+- **Bills** → **BillItems** → **Assignments** — a bill has line items, each item is split across one or more group members via an `Assignment` (`equal` / `percentage` / `exact_amount`). `bill_participants` is a separate pivot for "who's included in this bill" independent of item-level assignment.
+- **Settlements** — a record of one member paying another (`paid_by` → `paid_to` → `amount`). Settlements are self-reported and immediate — there is no pending/confirmation state.
+- **Buddies** — a lightweight friend list, separate from group membership.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Balances — computed, not stored
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+`app/Services/BalanceService.php` is the source of truth for "who owes what." Nothing is persisted as a running balance:
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+- `forGroup(Group $group)` walks every `confirmed` bill's item assignments plus the group's settlements to produce a **net** balance per member (negative = they owe the group, positive = they're owed). It also returns a **gross** balance (`gross_balance`) — the same calculation *before* settlements are applied — so clients can show a fixed "amount owed" that doesn't reset to zero the moment something is marked paid; `status` (`pending`/`paid`) and `is_payer` are derived from the net figure.
+- `forUser(User $user)` aggregates `forGroup()` across every group the user belongs to, for a dashboard-style "you're owed / you owe" total.
+- `billsForMember()` breaks down a single member's share bill-by-bill (used for the member detail view).
 
-## Agentic Development
+If you change how a balance is calculated, change it here — there is exactly one code path clients read from (`GET /groups/{id}/balances`, `GET /users/{id}/balances`).
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Storage
+
+Receipt images go to the `public` disk (`storage/app/public`, served via the `public/storage` symlink). Two things that will silently break this in a new environment:
+
+1. **`APP_URL` must be the API's own real public domain** — `image_url` is built from it at upload time and baked into the DB row, not recomputed on read. A placeholder/wrong `APP_URL` means every receipt image 404s forever, even after fixing it (existing rows keep the stale URL).
+2. **`php artisan storage:link` must run on deploy.** It's not currently wired into any deploy hook — if your platform's filesystem isn't persistent across deploys (e.g. Railway without an attached Volume), uploaded files vanish on the next deploy even though the symlink itself survives (it's part of the built image).
+
+## API conventions
+
+- Flat REST under `routes/api.php`, everything except `/register` `/login` `/forgot-password` `/reset-password` sits behind `auth:sanctum`.
+- Every response wraps its payload as `{ data: ... }` via Laravel API Resources (`app/Http/Resources/`).
+- Validation lives in `FormRequest` classes (`app/Http/Requests/`); 422s return Laravel's standard `{ message, errors: { field: [...] } }` shape, which both frontend clients know how to parse.
+- Authorization is inline (`abort_unless`/`abort_if` in controllers), not Policies — e.g. group rename/delete/payer-change is creator-only, checked directly in `GroupController`.
+
+## Setup
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer install
+cp .env.example .env
+php artisan key:generate
+# set DB_* to a real MySQL database, APP_URL to this API's own public URL,
+# and ANTHROPIC_API_KEY if you want bill OCR to work
+php artisan migrate
+php artisan storage:link
+php artisan serve
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+## Testing
 
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+php artisan test
+```

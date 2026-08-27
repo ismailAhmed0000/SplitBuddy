@@ -2,31 +2,36 @@ SplitBuddy mobile — React Native CLI (TypeScript), bootstrapped using [`@react
 
 ## Stack
 
-- **NativeWind v4** (Tailwind for RN) — `tailwind.config.js`, `global.css`, wired into `babel.config.js` / `metro.config.js`.
-- **Redux Toolkit + RTK Query** — `src/store/`. `authSlice` holds the session, `api/apiSlice.ts` talks to the Laravel backend (same API as `frontend/`).
-- **AsyncStorage** — persists the auth token + user across app restarts (`src/store/slices/authSlice.ts`).
-- **React Navigation** (native-stack) — `src/navigation/RootNavigator.tsx` switches between the auth stack (Login/Register) and app stack (Home) based on whether a session is hydrated.
+- **Bare React Native 0.87** (not Expo) + **TypeScript** — native `android/`/`ios/` project folders are checked in and built directly via `react-native run-android`/`run-ios`.
+- **NativeWind v4** (Tailwind for RN) — `tailwind.config.js`, `global.css`, wired into `babel.config.js` / `metro.config.js`. **Caveat learned the hard way:** `contentContainerClassName` does not reliably apply to `FlatList` in this setup — use a plain inline `contentContainerStyle={{ ... }}` object instead (see `GroupsListScreen.tsx`, `BuddiesScreen.tsx`, `BillsScreen.tsx` for the pattern). `className` on other components works fine.
+- **Redux Toolkit + RTK Query** — `src/store/`. `authSlice` holds the session (token + user); `store/api/*.ts` (one file per domain — `authApi`, `usersApi`, `groupsApi`, `billsApi`, `settlementsApi`, `buddiesApi`, `notificationsApi`) inject endpoints onto a shared `baseApi` and talk to the same Laravel backend as `frontend/`. Screens import hooks from the barrel file `store/api/apiSlice.ts`.
+- **AsyncStorage** — persists the auth token + user object across app restarts (`src/store/slices/authSlice.ts`, keys `splitbuddy_token` / `splitbuddy_user`). Any mutation that changes the logged-in user (e.g. `usersApi`'s `updateUser`) must also dispatch `userUpdated` **and** write through to `AsyncStorage` itself — RTK Query cache invalidation alone won't update the persisted copy.
+- **React Navigation** (native-stack + bottom-tabs) — `src/navigation/RootNavigator.tsx` switches between the auth stack (Login/Register) and the app's bottom tabs (Home/Buddies/Bills) based on whether a session is hydrated. `HomeStack.tsx` nests Groups/Bills/Settings screens inside the Home tab.
+- **react-native-svg** — every icon in `src/components/icons.tsx` and the `CollectorBadge`/`PaidStamp` seal graphics are hand-written `<Svg>` components, not an icon font/library.
 - **Push notifications** — `@react-native-firebase/messaging` (transport) + `@notifee/react-native` (foreground display). See **Push notifications setup** below — this needs manual configuration before the app will even launch.
 - **Jest + @testing-library/react-native** — `npm test`. See `src/store/slices/__tests__/authSlice.test.ts` and `src/screens/__tests__/LoginScreen.test.tsx` for the patterns in use.
 
-## Environment this was scaffolded in
+## Features
 
-This project was set up on a machine with **no Xcode and no Android SDK installed** — only Node, CocoaPods, and a JDK. Everything that doesn't need a simulator/device was verified directly:
+- **Settings** (`SettingsScreen.tsx`, reached via the avatar button on Home) — edit profile fields and bank details (`bank_name`/`bank_account_number`, shown to buddies as "where to send money" — informational only, no payment processing), plus log out.
+- **Groups** (`GroupsListScreen.tsx`, reached via the Groups card on Home) — each group's detail screen (`GroupDetailScreen.tsx`) has a Buddies/Bills tab toggle, a **Payer** section (creator picks one member as the group's "collector" via a modal), and a **Balances** list showing a green seal stamp (`CollectorBadge`/`PaidStamp`) for the collector/paid members, a greyed-out clickable stamp for a pending balance the viewer can act on (pay their own, or the collector marking someone else paid), and a plain "Pending" label otherwise.
 
-- `npm test` — full Jest suite passes.
-- `npx tsc --noEmit` — clean.
-- `npx eslint .` — clean.
-- `npx react-native bundle --platform ios ...` and `--platform android ...` — both produce a working production JS bundle (this is the strongest check possible without Xcode/Android Studio; it exercises Metro, NativeWind's Tailwind compilation, and every dependency's module resolution).
+## Verified
 
-**Nobody has run this on an actual simulator, emulator, or device yet.** Before that will work you still need, on whichever machine does the building:
+This has been built and run for real: `react-native run-android` (debug) on both the Android emulator and a physical USB-connected device, and as a standalone **release** build (`react-native run-android --mode release`) confirmed to keep working after Metro is killed and the USB cable is unplugged — release builds embed the JS bundle at build time, so they never depend on a live Metro connection. The release APK is signed with the default debug keystore (`android/app/build.gradle`) — fine for installing on your own device, but generate a real keystore before distributing it anywhere else.
 
-- **iOS**: Xcode + `bundle install && bundle exec pod install` in `ios/` (CocoaPods is installed here, but there's no Xcode to run `pod install` against yet — no Xcode means no iOS platform SDKs for it to target).
-- **Android**: Android Studio (or just the Android SDK + an emulator/device) with `ANDROID_HOME` set.
-- **Watchman** is recommended (`brew install watchman`) — Metro works without it but file-watching is slower.
+iOS has not been run (no Xcode available in this environment) — `npx react-native bundle --platform ios ...` producing a working bundle is the strongest check done so far. To actually run it you still need, on a Mac with Xcode installed:
+
+- `bundle install && bundle exec pod install` in `ios/`
+- **Watchman** is recommended for either platform (`brew install watchman`) — Metro works without it but file-watching is slower.
 
 ## API configuration
 
-`src/config/env.ts` points at the Laravel backend in `backend-api/`. In dev it targets `http://localhost:8000/api` on iOS and `http://10.0.2.2:8000/api` on Android (the emulator's alias for the host machine). **A physical device can't reach either** — point `API_URL` at your machine's LAN IP instead (e.g. `http://192.168.1.23:8000/api`), and make sure `php artisan serve --host=0.0.0.0` is listening on more than just localhost.
+`src/config/env.ts` is a single hardcoded `API_URL` constant (currently the production Railway URL) — there's no `__DEV__`/`Platform.OS` branching. For local backend development against an emulator/device:
+
+- **Android emulator**: point it at `http://10.0.2.2:<port>/api` (the emulator's alias for the host machine) and run `adb reverse tcp:8081 tcp:8081` so the emulator can reach Metro too.
+- **Physical device over USB**: same `adb reverse` trick works for port 8081, but the device can't resolve `10.0.2.2` or `localhost` on the host — use your machine's LAN IP instead (e.g. `http://192.168.1.23:8000/api`), with `php artisan serve --host=0.0.0.0`.
+- Remember to point `API_URL` back at the real backend before committing — it's easy to leave it on a local IP by accident.
 
 ## Push notifications setup
 
