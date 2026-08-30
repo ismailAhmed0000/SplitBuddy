@@ -15,6 +15,7 @@ export function Navbar() {
   const { data: user } = useCurrentUser()
   const logout = useLogout()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
 
   function handleLogout() {
     logout.mutate(undefined, {
@@ -44,21 +45,43 @@ export function Navbar() {
         {/* Desktop */}
         <div className="hidden items-center gap-2 md:flex">
           <NotificationsBell />
-          <Link
-            to="/settings"
-            aria-label="Settings"
-            className="mx-1 flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-sm font-medium text-brand-700 transition hover:bg-brand-200"
-          >
-            {initial}
-          </Link>
-          <button
-            type="button"
-            onClick={handleLogout}
-            disabled={logout.isPending}
-            className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-white transition hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {logout.isPending ? 'Logging out…' : 'Log out'}
-          </button>
+          <div className="relative mx-1">
+            <button
+              type="button"
+              onClick={() => setIsProfileMenuOpen((open) => !open)}
+              aria-label="Account menu"
+              aria-expanded={isProfileMenuOpen}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-sm font-medium text-brand-700 transition hover:bg-brand-200"
+            >
+              {initial}
+            </button>
+
+            {isProfileMenuOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setIsProfileMenuOpen(false)} />
+                <div className="absolute right-0 z-20 mt-2 w-48 rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
+                  <Link
+                    to="/settings"
+                    onClick={() => setIsProfileMenuOpen(false)}
+                    className="block px-4 py-2 text-sm text-slate-600 transition hover:bg-slate-50 hover:text-ink"
+                  >
+                    Settings
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsProfileMenuOpen(false)
+                      handleLogout()
+                    }}
+                    disabled={logout.isPending}
+                    className="block w-full px-4 py-2 text-left text-sm text-error-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {logout.isPending ? 'Logging out…' : 'Log out'}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         {/* Mobile */}
