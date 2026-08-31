@@ -2,7 +2,6 @@ import { NavigationContainer, type NavigatorScreenParams } from '@react-navigati
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useEffect } from 'react';
-import { ActivityIndicator, View } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { hydrateAuth } from '../store/slices/authSlice';
 import LoginScreen from '../screens/LoginScreen';
@@ -11,6 +10,7 @@ import BuddiesScreen from '../screens/BuddiesScreen';
 import { HomeStack, type HomeStackParamList } from './HomeStack';
 import { BillsStack, type BillsStackParamList } from './BillsStack';
 import { BottomTabBar } from './BottomTabBar';
+import { SplashScreen } from '../components/SplashScreen';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -35,11 +35,7 @@ export function RootNavigator() {
   }, [dispatch]);
 
   if (!isHydrated) {
-    return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator size="large" color="#0D9488" />
-      </View>
-    );
+    return <SplashScreen />;
   }
 
   return (
