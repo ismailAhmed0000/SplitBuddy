@@ -69,23 +69,46 @@ export function UploadBillCard() {
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') inputRef.current?.click()
         }}
-        className={`mt-4 flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-4 py-16 text-center transition ${
-          isDragging ? 'border-brand-500 bg-brand-50' : 'border-slate-300 hover:border-brand-400 hover:bg-slate-50'
+        className={`group relative mt-4 flex min-h-[220px] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed px-4 py-10 text-center transition ${
+          isDragging ? 'scale-[1.01] border-brand-500 bg-brand-50' : 'border-slate-300 hover:border-brand-400 hover:bg-slate-50'
         }`}
       >
-        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-100 text-brand-600">
-          <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={1.75}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 16V8m0 0-3.5 3.5M12 8l3.5 3.5" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 16.5v1a2.5 2.5 0 0 0 2.5 2.5h9a2.5 2.5 0 0 0 2.5-2.5v-1" />
-          </svg>
-        </span>
+        <div className="pointer-events-none absolute inset-0 bg-[repeating-linear-gradient(-45deg,theme(colors.slate.400/0.06)_0px,theme(colors.slate.400/0.06)_1px,transparent_1px,transparent_10px)]" />
 
         {file ? (
-          <p className="mt-4 text-sm font-semibold text-slate-700">{file.name}</p>
+          <div className="relative z-10 flex w-full max-w-xs items-center gap-3 rounded-xl bg-white p-3 shadow-sm">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-100 text-brand-600">
+              <ImageFileIcon />
+            </span>
+            <div className="min-w-0 flex-1 text-left">
+              <p className="truncate text-sm font-medium text-slate-700">{file.name}</p>
+              <p className="text-xs text-slate-400">{formatFileSize(file.size)}</p>
+            </div>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                setFile(null)
+              }}
+              disabled={isSubmitting}
+              aria-label="Remove file"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 transition hover:bg-error-50 hover:text-error-600 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <TrashIcon />
+            </button>
+          </div>
         ) : (
           <>
-            <p className="mt-4 text-sm font-semibold text-slate-700">Tap to upload or drag a photo here</p>
-            <p className="mt-1 text-xs tracking-wide text-slate-400 uppercase">PNG, JPG or WEBP</p>
+            <span className="relative z-10 flex h-16 w-16 items-center justify-center rounded-full bg-brand-100 text-brand-600 transition-colors group-hover:bg-brand-200">
+              <UploadIcon />
+            </span>
+            <h3 className="relative z-10 mt-4 text-base font-semibold text-slate-700">
+              Tap to upload <span className="font-normal text-slate-400">or drag and drop</span>
+            </h3>
+            <p className="relative z-10 mt-1 text-xs tracking-wide text-slate-400 uppercase">PNG, JPG or WEBP</p>
+            <span className="relative z-10 pointer-events-none mt-5 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-600">
+              Browse files
+            </span>
           </>
         )}
 
@@ -127,26 +150,55 @@ export function UploadBillCard() {
 
           {error && <p className="text-sm text-error-600">{error}</p>}
 
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <button
-              type="button"
-              onClick={handleContinue}
-              disabled={isSubmitting}
-              className="flex-1 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {isSubmitting ? 'Reading your receipt…' : 'Continue'}
-            </button>
-            <button
-              type="button"
-              onClick={() => setFile(null)}
-              disabled={isSubmitting}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Remove
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={handleContinue}
+            disabled={isSubmitting}
+            className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isSubmitting ? 'Reading your receipt…' : 'Continue'}
+          </button>
         </div>
       )}
     </div>
+  )
+}
+
+function formatFileSize(bytes: number) {
+  if (bytes === 0) return '0 Bytes'
+  const k = 1024
+  const sizes = ['Bytes', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`
+}
+
+function UploadIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 16V8m0 0-3.5 3.5M12 8l3.5 3.5" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 16.5v1a2.5 2.5 0 0 0 2.5 2.5h9a2.5 2.5 0 0 0 2.5-2.5v-1" />
+    </svg>
+  )
+}
+
+function ImageFileIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.6}>
+      <rect x="3.5" y="4.5" width="17" height="15" rx="2" strokeLinejoin="round" />
+      <circle cx="9" cy="10" r="1.5" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="m4 17 5-5 3 3 3-3 5 5" />
+    </svg>
+  )
+}
+
+function TrashIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.6}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M5 7h14M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-9 0 1 12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-12"
+      />
+    </svg>
   )
 }
