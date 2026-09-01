@@ -4,7 +4,7 @@ export function LandingHero() {
       <div className="mx-auto max-w-3xl text-center">
         <p className="text-sm font-semibold tracking-wide text-brand-600 uppercase">Launching soon</p>
 
-        <h1 className="mt-6 text-5xl leading-tight font-extrabold text-ink sm:text-6xl">
+        <h1 className="mt-6 text-4xl leading-tight font-extrabold text-ink sm:text-5xl md:text-6xl">
           Split bills with friends, without the awkward math.
         </h1>
 
