@@ -8,35 +8,92 @@ export function AnalyticsBanner() {
 
   if (isLoading) {
     return (
-      <div className="grid animate-pulse grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid animate-pulse grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="h-28 rounded-2xl bg-slate-100" />
         <div className="h-28 rounded-2xl bg-slate-100" />
         <div className="h-28 rounded-2xl bg-slate-100" />
       </div>
     )
   }
 
+  const groups = balances?.groups ?? []
   const overall = balances?.overall_balance ?? 0
-  const groupCount = balances?.groups.length ?? 0
+  const owed = groups.filter((g) => g.balance > 0).reduce((sum, g) => sum + g.balance, 0)
   const isOwed = overall > 0
   const isOwing = overall < 0
 
   const statusLabel = isOwed ? "You're owed" : isOwing ? 'You owe' : "You're settled up"
-  const amountColor = isOwed ? 'text-brand-600' : isOwing ? 'text-error-600' : 'text-ink'
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <p className="text-sm font-medium text-slate-500">{statusLabel}</p>
-        <p className={`mt-1 text-3xl font-semibold ${amountColor}`}>{currency.format(Math.abs(overall))}</p>
-        {groupCount === 0 && (
-          <p className="mt-2 text-sm text-slate-500">Join or create a group to start tracking balances.</p>
-        )}
-      </div>
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <StatCard
+        label={statusLabel}
+        value={currency.format(Math.abs(overall))}
+        icon={<SettledIcon />}
+        tone={isOwing ? 'error' : 'brand'}
+      />
+      <StatCard label="You're owed" value={currency.format(owed)} icon={<DollarIcon />} tone="amber" />
+      <StatCard label="Active groups" value={String(groups.length)} icon={<GroupsIcon />} tone="slate" />
+    </div>
+  )
+}
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <p className="text-sm font-medium text-slate-500">Active groups</p>
-        <p className="mt-1 text-3xl font-semibold text-ink">{groupCount}</p>
+type Tone = 'brand' | 'amber' | 'slate' | 'error'
+
+const toneClasses: Record<Tone, string> = {
+  brand: 'bg-brand-100 text-brand-600',
+  amber: 'bg-amber-100 text-amber-600',
+  slate: 'bg-slate-100 text-slate-500',
+  error: 'bg-error-100 text-error-600',
+}
+
+function StatCard({
+  label,
+  value,
+  icon,
+  tone,
+}: {
+  label: string
+  value: string
+  icon: React.ReactNode
+  tone: Tone
+}) {
+  return (
+    <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${toneClasses[tone]}`}>
+        {icon}
+      </span>
+      <div>
+        <p className="text-sm text-slate-500">{label}</p>
+        <p className="mt-1 text-2xl font-bold text-ink">{value}</p>
       </div>
     </div>
+  )
+}
+
+function SettledIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={1.75}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4 12a8 8 0 0 1 13.657-5.657M20 12a8 8 0 0 1-13.657 5.657M17 3v4h-4M7 21v-4h4"
+      />
+    </svg>
+  )
+}
+
+function DollarIcon() {
+  return <span className="text-xl font-bold">$</span>
+}
+
+function GroupsIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={1.75}>
+      <circle cx="9" cy="8" r="3" />
+      <path strokeLinecap="round" d="M2.5 20a6.5 6.5 0 0 1 13 0" />
+      <circle cx="17" cy="8.5" r="2.2" />
+      <path strokeLinecap="round" d="M15 13.3a5.4 5.4 0 0 1 4.5 6.7" />
+    </svg>
   )
 }

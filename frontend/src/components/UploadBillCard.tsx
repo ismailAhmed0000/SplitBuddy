@@ -69,30 +69,23 @@ export function UploadBillCard() {
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') inputRef.current?.click()
         }}
-        className={`mt-4 flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-4 py-10 text-center transition ${
+        className={`mt-4 flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-4 py-16 text-center transition ${
           isDragging ? 'border-brand-500 bg-brand-50' : 'border-slate-300 hover:border-brand-400 hover:bg-slate-50'
         }`}
       >
-        <svg
-          viewBox="0 0 24 24"
-          className="h-8 w-8 text-slate-400"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={1.5}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 16.5V9m0 0-3 3m3-3 3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3.75 3.75 0 0 1 4.157 3.985A4.5 4.5 0 0 1 17.25 19.5H6.75Z"
-          />
-        </svg>
+        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-100 text-brand-600">
+          <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={1.75}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 16V8m0 0-3.5 3.5M12 8l3.5 3.5" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 16.5v1a2.5 2.5 0 0 0 2.5 2.5h9a2.5 2.5 0 0 0 2.5-2.5v-1" />
+          </svg>
+        </span>
 
         {file ? (
-          <p className="mt-3 text-sm font-medium text-slate-700">{file.name}</p>
+          <p className="mt-4 text-sm font-semibold text-slate-700">{file.name}</p>
         ) : (
           <>
-            <p className="mt-3 text-sm font-medium text-slate-700">Tap to upload or drag a photo here</p>
-            <p className="mt-1 text-xs text-slate-400">PNG, JPG or WEBP</p>
+            <p className="mt-4 text-sm font-semibold text-slate-700">Tap to upload or drag a photo here</p>
+            <p className="mt-1 text-xs tracking-wide text-slate-400 uppercase">PNG, JPG or WEBP</p>
           </>
         )}
 

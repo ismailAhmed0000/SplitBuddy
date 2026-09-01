@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useCurrentUser, useLogout } from '@/lib/auth'
 import { NotificationsBell } from '@/components/NotificationsBell'
+import { FourDotMark } from '@/components/BrandMark'
 
 const navLinks = [
   { to: '/', label: 'Dashboard' },
@@ -25,16 +26,17 @@ export function Navbar() {
 
   const initial = user?.name?.charAt(0).toUpperCase() ?? '?'
 
-  const linkClass = 'text-sm font-medium text-slate-600 transition hover:text-ink [&.active]:text-ink'
+  const linkClass = 'text-sm font-medium text-slate-500 transition hover:text-ink [&.active]:font-semibold [&.active]:text-ink'
 
   return (
-    <header className="sticky top-4 z-20 mx-auto mb-6 w-full max-w-4xl px-4">
-      <div className="flex h-14 items-center justify-between gap-4 rounded-full border border-slate-200 bg-white/95 pl-4 pr-2 shadow-sm shadow-ink/5 backdrop-blur">
-        <Link to="/" className="flex shrink-0 items-center">
-          <span className="text-base font-semibold text-ink">SplitBuddy</span>
+    <header className="border-b border-slate-200 bg-white">
+      <div className="mx-auto flex h-20 max-w-6xl items-center justify-between gap-4 px-6">
+        <Link to="/" className="flex shrink-0 items-center gap-2.5">
+          <FourDotMark size={32} />
+          <span className="text-lg font-bold text-ink">SplitBuddy</span>
         </Link>
 
-        <nav className="hidden items-center gap-6 md:flex">
+        <nav className="hidden items-center gap-8 md:flex">
           {navLinks.map((link) => (
             <Link key={link.to} to={link.to} className={linkClass} activeOptions={{ exact: link.to === '/' }}>
               {link.label}
@@ -43,7 +45,7 @@ export function Navbar() {
         </nav>
 
         {/* Desktop */}
-        <div className="hidden items-center gap-2 md:flex">
+        <div className="hidden items-center gap-3 md:flex">
           <NotificationsBell />
           <div className="relative mx-1">
             <button
@@ -51,7 +53,7 @@ export function Navbar() {
               onClick={() => setIsProfileMenuOpen((open) => !open)}
               aria-label="Account menu"
               aria-expanded={isProfileMenuOpen}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-sm font-medium text-brand-700 transition hover:bg-brand-200"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-600 text-sm font-semibold text-white transition hover:bg-brand-700"
             >
               {initial}
             </button>
@@ -133,7 +135,7 @@ export function Navbar() {
               onClick={() => setIsMenuOpen(false)}
               className="mt-6 flex items-center gap-2 border-t border-slate-100 pt-4"
             >
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-sm font-medium text-brand-700">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-600 text-sm font-semibold text-white">
                 {initial}
               </span>
               <span className="text-sm font-medium text-slate-700">{user?.name}</span>

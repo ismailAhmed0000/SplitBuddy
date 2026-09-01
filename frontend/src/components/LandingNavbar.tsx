@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import { FourDotMark } from '@/components/BrandMark'
 
 const navLinks = [
   { href: '#how-it-works', label: 'How it works' },
@@ -37,26 +38,5 @@ export function LandingNavbar() {
         </Link>
       </div>
     </header>
-  )
-}
-
-function FourDotMark() {
-  const dots = [
-    { top: 0, left: 0, className: 'bg-brand-500/80' },
-    { top: 0, left: 14, className: 'bg-brand-300/80' },
-    { top: 14, left: 0, className: 'bg-brand-700/80' },
-    { top: 14, left: 14, className: 'bg-brand-400/80' },
-  ]
-
-  return (
-    <span className="relative block h-9 w-9" aria-hidden="true">
-      {dots.map((dot) => (
-        <span
-          key={`${dot.top}-${dot.left}`}
-          className={`absolute h-6 w-6 rounded-full mix-blend-multiply ${dot.className}`}
-          style={{ top: dot.top, left: dot.left }}
-        />
-      ))}
-    </span>
   )
 }
