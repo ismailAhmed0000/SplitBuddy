@@ -1,6 +1,7 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import { useCreateGroup, useGroups } from '@/lib/groups'
+import { useCreateGroup, useDeleteGroup, useGroups } from '@/lib/groups'
+import { GroupRow } from '@/components/GroupRow'
 
 export const Route = createFileRoute('/_authenticated/groups/')({
   component: GroupsListPage,
@@ -9,6 +10,7 @@ export const Route = createFileRoute('/_authenticated/groups/')({
 function GroupsListPage() {
   const { data: groups, isLoading } = useGroups()
   const createGroup = useCreateGroup()
+  const deleteGroup = useDeleteGroup()
 
   const [isCreating, setIsCreating] = useState(false)
   const [name, setName] = useState('')
@@ -21,6 +23,12 @@ function GroupsListPage() {
         setIsCreating(false)
       },
     })
+  }
+
+  function handleDelete(id: number) {
+    if (confirm('Delete this group? This cannot be undone.')) {
+      deleteGroup.mutate(id)
+    }
   }
 
   return (
@@ -73,34 +81,21 @@ function GroupsListPage() {
         </div>
       )}
 
-      <div className="mt-6 flex flex-col gap-3">
-        {isLoading && <p className="text-sm text-slate-500">Loading…</p>}
+      {isLoading && <p className="mt-6 text-sm text-slate-500">Loading…</p>}
 
-        {!isLoading && groups?.length === 0 && !isCreating && (
-          <div className="rounded-2xl border border-dashed border-slate-300 p-10 text-center">
-            <p className="text-sm text-slate-500">You're not in any groups yet.</p>
-          </div>
-        )}
+      {!isLoading && groups?.length === 0 && !isCreating && (
+        <div className="mt-6 rounded-2xl border border-dashed border-slate-300 p-10 text-center">
+          <p className="text-sm text-slate-500">You're not in any groups yet.</p>
+        </div>
+      )}
 
-        {groups?.map((group) => (
-          <Link
-            key={group.id}
-            to="/groups/$groupId"
-            params={{ groupId: String(group.id) }}
-            className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-brand-300"
-          >
-            <div>
-              <p className="text-sm font-medium text-ink">{group.name}</p>
-              <p className="mt-0.5 text-xs text-slate-500">
-                {group.members_count ?? group.members?.length ?? 0} buddies
-              </p>
-            </div>
-            <svg viewBox="0 0 24 24" className="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
-        ))}
-      </div>
+      {groups && groups.length > 0 && (
+        <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          {groups.map((group) => (
+            <GroupRow key={group.id} group={group} onDelete={() => handleDelete(group.id)} />
+          ))}
+        </div>
+      )}
     </main>
   )
 }
