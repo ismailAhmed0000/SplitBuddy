@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
+import { AddBuddyModal } from '@/components/AddBuddyModal'
 import { CollectorBadge } from '@/components/CollectorBadge'
+import { ConfirmBillCard } from '@/components/ConfirmBillCard'
 import { ItemAssignmentRow } from '@/components/ItemAssignmentRow'
 import { money } from '@/lib/format'
 import { parseApiError } from '@/lib/api'
@@ -31,17 +33,15 @@ function BillReviewPage() {
 
   const isGroupCreator = group?.created_by === currentUser?.id
 
-  const [newMemberName, setNewMemberName] = useState('')
   const [buddyError, setBuddyError] = useState<string | null>(null)
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
 
-  function handleAddMember() {
-    if (!newMemberName.trim()) return
+  function handleAddMember(name: string) {
     setBuddyError(null)
     addMember.mutate(
-      { name: newMemberName.trim() },
+      { name },
       {
         onSuccess: (member) => {
-          setNewMemberName('')
           addParticipant.mutate(member.id, { onError: (err) => setBuddyError(parseApiError(err).message) })
         },
         onError: (err) => setBuddyError(parseApiError(err).message),
@@ -253,25 +253,26 @@ function BillReviewPage() {
               </div>
             )}
 
-            <div className="mt-3 flex items-center gap-1.5 border-t border-slate-100 pt-3">
-              <input
-                type="text"
-                value={newMemberName}
-                onChange={(e) => setNewMemberName(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddMember()}
-                placeholder="Add a buddy not on the app"
-                className="rounded-full border border-dashed border-slate-300 px-3 py-1 text-xs outline-none placeholder:text-slate-400 focus:border-brand-500"
-              />
+            <div className="mt-3 border-t border-slate-100 pt-3">
               <button
                 type="button"
-                onClick={handleAddMember}
-                disabled={addMember.isPending || !newMemberName.trim()}
-                className="rounded-full bg-brand-600 px-3 py-1 text-xs font-medium text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={() => setIsAddModalOpen(true)}
+                className="rounded-full border border-dashed border-slate-300 px-3 py-1 text-xs font-medium text-slate-600 transition hover:border-brand-400 hover:text-brand-700"
               >
-                Add
+                + Add a buddy
               </button>
             </div>
             {buddyError && <p className="mt-2 text-xs text-error-600">{buddyError}</p>}
+
+            {isAddModalOpen && (
+              <AddBuddyModal
+                existingUserIds={groupMemberUserIds}
+                onAddBuddy={handleAddRegisteredBuddy}
+                onAddName={handleAddMember}
+                isAdding={addMember.isPending}
+                onClose={() => setIsAddModalOpen(false)}
+              />
+            )}
           </div>
 
           <div className="mt-6 flex flex-col gap-3">
@@ -280,6 +281,8 @@ function BillReviewPage() {
               <ItemAssignmentRow key={item.id} billId={bill.id} item={item} members={bill.participants} />
             ))}
           </div>
+
+          <ConfirmBillCard status={bill.status} onConfirm={() => confirmBill.mutate()} isConfirming={confirmBill.isPending} />
         </>
       )}
     </main>

@@ -23,19 +23,19 @@ export function BalanceRow({
       <Link
         to="/groups/$groupId/members/$memberId"
         params={{ groupId: String(groupId), memberId: String(member.group_member_id) }}
-        className="flex min-w-0 items-center gap-3 transition hover:opacity-80"
+        className="flex min-w-0 flex-1 items-center gap-3 transition hover:opacity-80"
       >
         <MemberAvatar name={member.name} isCollector={member.is_payer} />
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="truncate text-sm font-semibold text-ink">{member.name}</span>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+            <span className="max-w-full truncate text-sm font-semibold text-ink">{member.name}</span>
             {member.is_payer && (
-              <span className="rounded-full bg-brand-100 px-2 py-0.5 text-[10px] font-bold tracking-wide text-brand-700 uppercase">
+              <span className="shrink-0 rounded-full bg-brand-100 px-2 py-0.5 text-[10px] font-bold tracking-wide text-brand-700 uppercase">
                 Collector
               </span>
             )}
           </div>
-          <p className="text-sm text-slate-500">{member.is_payer ? 'is owed' : 'owes'}</p>
+          <p className="truncate text-sm text-slate-500">{member.is_payer ? 'is owed' : 'owes'}</p>
         </div>
       </Link>
 
