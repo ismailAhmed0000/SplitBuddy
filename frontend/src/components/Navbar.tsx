@@ -29,7 +29,7 @@ export function Navbar() {
   const linkClass = 'text-sm font-medium text-slate-500 transition hover:text-ink [&.active]:font-semibold [&.active]:text-ink'
 
   return (
-    <header className="border-b border-slate-200 bg-white">
+    <header className="relative border-b border-slate-200 bg-white">
       <div className="mx-auto flex h-20 max-w-6xl items-center justify-between gap-4 px-6">
         <Link to="/" className="flex shrink-0 items-center gap-2.5">
           <FourDotMark size={32} />

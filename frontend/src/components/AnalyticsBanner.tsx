@@ -17,32 +17,22 @@ export function AnalyticsBanner() {
   }
 
   const groups = balances?.groups ?? []
-  const overall = balances?.overall_balance ?? 0
   const owed = groups.filter((g) => g.balance > 0).reduce((sum, g) => sum + g.balance, 0)
-  const isOwed = overall > 0
-  const isOwing = overall < 0
-
-  const statusLabel = isOwed ? "You're owed" : isOwing ? 'You owe' : "You're settled up"
+  const owing = groups.filter((g) => g.balance < 0).reduce((sum, g) => sum + Math.abs(g.balance), 0)
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-      <StatCard
-        label={statusLabel}
-        value={currency.format(Math.abs(overall))}
-        icon={<SettledIcon />}
-        tone={isOwing ? 'error' : 'brand'}
-      />
-      <StatCard label="You're owed" value={currency.format(owed)} icon={<DollarIcon />} tone="amber" />
+      <StatCard label="You're owed" value={currency.format(owed)} icon={<SettledIcon />} tone="brand" />
+      <StatCard label="You owe" value={currency.format(owing)} icon={<DollarIcon />} tone="error" />
       <StatCard label="Active groups" value={String(groups.length)} icon={<GroupsIcon />} tone="slate" />
     </div>
   )
 }
 
-type Tone = 'brand' | 'amber' | 'slate' | 'error'
+type Tone = 'brand' | 'slate' | 'error'
 
 const toneClasses: Record<Tone, string> = {
   brand: 'bg-brand-100 text-brand-600',
-  amber: 'bg-amber-100 text-amber-600',
   slate: 'bg-slate-100 text-slate-500',
   error: 'bg-error-100 text-error-600',
 }
