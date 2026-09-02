@@ -178,6 +178,38 @@ export function useRemoveGroupMember(groupId: number) {
   })
 }
 
+export type ExportedMessageItem = {
+  item_name: string
+  amount: number
+  bill_name: string
+  bill_date: string | null
+  bill_date_formatted: string | null
+}
+
+export type ExportedMessage = {
+  group_member_id: number
+  name: string
+  amount_owed: number
+  items: ExportedMessageItem[]
+  message: string
+}
+
+export type ExportMessagesResult = {
+  data: ExportedMessage[]
+  combined_message: string
+}
+
+export function useExportMessages(groupId: number) {
+  return useMutation({
+    mutationFn: async (memberIds: number[]) => {
+      const { data } = await api.post<ExportMessagesResult>(`/groups/${groupId}/export-messages`, {
+        member_ids: memberIds,
+      })
+      return data
+    },
+  })
+}
+
 export function useSearchUsers(query: string) {
   return useQuery({
     queryKey: ['users', 'search', query],

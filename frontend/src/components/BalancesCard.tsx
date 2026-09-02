@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { BalanceRow } from './BalanceRow'
+import { GenerateMessageModal } from './GenerateMessageModal'
 import { useCreateSettlement, useSettlements } from '@/lib/settlements'
 import { money } from '@/lib/format'
 import type { GroupBalance } from '@/lib/groups'
@@ -18,6 +20,7 @@ export function BalancesCard({
 }) {
   const { data: settlements } = useSettlements(groupId)
   const createSettlement = useCreateSettlement(groupId)
+  const [isMessageModalOpen, setIsMessageModalOpen] = useState(false)
 
   const myBalance = balances.find((b) => b.group_member_id === myMemberId)
   const canSettleUp = Boolean(payerId) && myBalance && !myBalance.is_payer && myBalance.status === 'pending'
@@ -35,7 +38,16 @@ export function BalancesCard({
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h2 className="text-lg font-bold text-ink">Balances</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-bold text-ink">Balances</h2>
+        <button
+          type="button"
+          onClick={() => setIsMessageModalOpen(true)}
+          className="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-brand-400 hover:text-brand-700"
+        >
+          Generate message
+        </button>
+      </div>
 
       <div className="mt-2">
         {balances.map((member) => {
@@ -80,6 +92,14 @@ export function BalancesCard({
             ))}
           </div>
         </div>
+      )}
+
+      {isMessageModalOpen && (
+        <GenerateMessageModal
+          groupId={groupId}
+          members={balances.map((b) => ({ id: b.group_member_id, name: b.name }))}
+          onClose={() => setIsMessageModalOpen(false)}
+        />
       )}
     </div>
   )
