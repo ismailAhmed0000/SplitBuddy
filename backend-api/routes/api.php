@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\BillController;
 use App\Http\Controllers\Api\BillItemController;
 use App\Http\Controllers\Api\BillParticipantController;
 use App\Http\Controllers\Api\BuddyController;
+use App\Http\Controllers\Api\ExportController;
 use App\Http\Controllers\Api\GroupController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\SettlementController;
@@ -45,6 +46,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/groups/{id}/members/{memberId}', [GroupController::class, 'showMember']);
     Route::delete('/groups/{id}/members/{memberId}', [GroupController::class, 'removeMember']);
     Route::get('/groups/{id}/balances', [BalanceController::class, 'groupBalances']);
+    Route::post('/groups/{id}/export-messages', [ExportController::class, 'groupMessages']);
 
     // Bills
     Route::get('/bills', [BillController::class, 'index']);

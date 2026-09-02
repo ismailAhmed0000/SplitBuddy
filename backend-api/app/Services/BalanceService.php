@@ -148,6 +148,141 @@ class BalanceService
     }
 
     /**
+     * A ready-to-share text message summarizing what this member currently
+     * owes: itemized by bill (confirmed bills only, since only those count
+     * toward balances), with dates, plus who to pay.
+     *
+     * @return array<string, mixed>
+     */
+    public function exportMessage(Group $group, GroupMember $member): array
+    {
+        $balance = $this->forGroup($group)->firstWhere('group_member_id', $member->id);
+        $amountOwed = round(abs(min(0.0, $balance['balance'] ?? 0.0)), 2);
+
+        $bills = $group->bills()
+            ->where('status', 'confirmed')
+            ->with('items.assignments')
+            ->orderByDesc('bill_date')
+            ->get();
+
+        $lines = [];
+
+        foreach ($bills as $bill) {
+            $items = $bill->items->filter(
+                fn ($item) => $item->assignments->contains('group_member_id', $member->id)
+            );
+
+            foreach ($items as $item) {
+                $assignment = $item->assignments->firstWhere('group_member_id', $member->id);
+                $itemTotal = (float) ($item->final_price ?? $item->total_price);
+                $amount = round($this->shareOf($assignment, $itemTotal, $item->assignments->count()), 2);
+
+                $lines[] = [
+                    'item_name' => $item->name,
+                    'amount' => $amount,
+                    'bill_name' => $bill->merchant_name ?? 'Receipt',
+                    'bill_date' => $bill->bill_date?->toDateString(),
+                    'bill_date_formatted' => $bill->bill_date?->format('M j, Y'),
+                ];
+            }
+        }
+
+        $payer = $group->payer;
+
+        return [
+            'group_member_id' => $member->id,
+            'name' => $member->name,
+            'amount_owed' => $amountOwed,
+            'items' => $lines,
+            'message' => $this->composeMessage($group, $member, $amountOwed, $lines, $payer),
+        ];
+    }
+
+    /**
+     * @param  GroupMember[]|Collection<int, GroupMember>  $members
+     * @return Collection<int, array<string, mixed>>
+     */
+    public function exportMessages(Group $group, iterable $members): Collection
+    {
+        return collect($members)->map(fn ($member) => $this->exportMessage($group, $member))->values();
+    }
+
+    /**
+     * One shared message covering every selected member's outstanding
+     * amount and items, for posting once (e.g. in a group chat) instead of
+     * sending each person their own message.
+     *
+     * @param  Collection<int, array<string, mixed>>  $exports  Results from exportMessage(), in the order they should appear.
+     */
+    public function combinedMessage(Group $group, Collection $exports): string
+    {
+        $owing = $exports->filter(fn ($export) => $export['amount_owed'] > 0.0)->values();
+
+        if ($owing->isEmpty()) {
+            return "Everyone selected is all settled up in {$group->name}. \u{1F389}";
+        }
+
+        $text = "Here's who owes what for {$group->name}:\n";
+
+        foreach ($owing as $export) {
+            $text .= "\n{$export['name']} \u{2014} MVR ".number_format((float) $export['amount_owed'], 2)."\n";
+
+            foreach ($export['items'] as $line) {
+                $suffix = $line['bill_date_formatted']
+                    ? " ({$line['bill_name']}, {$line['bill_date_formatted']})"
+                    : " ({$line['bill_name']})";
+
+                $text .= "  \u{2022} {$line['item_name']} \u{2014} MVR ".number_format((float) $line['amount'], 2)."{$suffix}\n";
+            }
+        }
+
+        $payer = $group->payer;
+        if ($payer) {
+            $text .= "\nPlease send to {$payer->name}";
+
+            $bankBits = array_filter([$payer->user?->bank_name, $payer->user?->bank_account_number]);
+            if ($bankBits !== []) {
+                $text .= ' — '.implode(', ', $bankBits);
+            }
+        }
+
+        return $text;
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $lines
+     */
+    private function composeMessage(Group $group, GroupMember $member, float $amountOwed, array $lines, ?GroupMember $payer): string
+    {
+        if ($amountOwed <= 0.0) {
+            return "Hi {$member->name}, you're all settled up in {$group->name}. \u{1F389}";
+        }
+
+        $text = "Hi {$member->name},\n\nHere's what you owe for {$group->name}:\n\n";
+
+        foreach ($lines as $line) {
+            $suffix = $line['bill_date_formatted']
+                ? " ({$line['bill_name']}, {$line['bill_date_formatted']})"
+                : " ({$line['bill_name']})";
+
+            $text .= "\u{2022} {$line['item_name']} \u{2014} MVR ".number_format((float) $line['amount'], 2)."{$suffix}\n";
+        }
+
+        $text .= "\nTotal owed: MVR ".number_format($amountOwed, 2);
+
+        if ($payer && $payer->id !== $member->id) {
+            $text .= "\n\nPlease pay {$payer->name}";
+
+            $bankBits = array_filter([$payer->user?->bank_name, $payer->user?->bank_account_number]);
+            if ($bankBits !== []) {
+                $text .= ' — '.implode(', ', $bankBits);
+            }
+        }
+
+        return $text;
+    }
+
+    /**
      * Per-group net balance for every group the user belongs to, plus the
      * total across all of them.
      *
