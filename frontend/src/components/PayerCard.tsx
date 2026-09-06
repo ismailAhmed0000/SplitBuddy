@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useUpdateGroup } from '@/lib/groups'
+import { useUpdateTab } from '@/lib/tabs'
 
 type PayerMember = {
   name: string
@@ -78,7 +78,7 @@ function EditPayerModal({
   payerId: number | null
   onClose: () => void
 }) {
-  const updateGroup = useUpdateGroup(groupId)
+  const updateGroup = useUpdateTab(groupId)
   const [selected, setSelected] = useState<number | ''>(payerId ?? '')
 
   function handleSave() {

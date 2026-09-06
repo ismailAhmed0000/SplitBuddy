@@ -20,6 +20,8 @@ class GroupResource extends JsonResource
             'created_by' => $this->created_by,
             'creator' => new UserResource($this->whenLoaded('creator')),
             'members' => GroupMemberResource::collection($this->whenLoaded('members')),
+            'members_count' => $this->whenCounted('members'),
+            'bills_count' => $this->whenCounted('bills'),
             'payer_id' => $this->payer_id,
             'payer' => new GroupMemberResource($this->whenLoaded('payer')),
             'created_at' => $this->created_at,

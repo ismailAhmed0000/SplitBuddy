@@ -9,7 +9,7 @@ import { parseApiError } from '@/lib/api'
 import { useCurrentUser } from '@/lib/auth'
 import { useAddBillParticipant, useBill, useConfirmBill, useRemoveBillParticipant, useRetryExtraction } from '@/lib/bills'
 import { useBuddies } from '@/lib/buddies'
-import { useAddGroupMember, useGroup, useRemoveGroupMember, useUpdateGroup } from '@/lib/groups'
+import { useAddTabMember, useTab, useRemoveTabMember, useUpdateTab } from '@/lib/tabs'
 
 export const Route = createFileRoute('/_authenticated/bills/$billId')({
   component: BillReviewPage,
@@ -20,16 +20,16 @@ function BillReviewPage() {
   const id = Number(billId)
 
   const { data: bill, isLoading } = useBill(id)
-  const { data: group } = useGroup(bill?.group_id)
+  const { data: group } = useTab(bill?.group_id)
   const { data: buddies } = useBuddies()
   const { data: currentUser } = useCurrentUser()
   const retryExtraction = useRetryExtraction(id)
   const confirmBill = useConfirmBill(id)
-  const addMember = useAddGroupMember(bill?.group_id)
+  const addMember = useAddTabMember(bill?.group_id)
   const addParticipant = useAddBillParticipant(bill?.id)
   const removeParticipant = useRemoveBillParticipant(bill?.id)
-  const removeGroupMember = useRemoveGroupMember(bill?.group_id ?? 0)
-  const updateGroup = useUpdateGroup(bill?.group_id ?? 0)
+  const removeGroupMember = useRemoveTabMember(bill?.group_id ?? 0)
+  const updateGroup = useUpdateTab(bill?.group_id ?? 0)
 
   const isGroupCreator = group?.created_by === currentUser?.id
 
@@ -73,7 +73,7 @@ function BillReviewPage() {
   }
 
   function handleRemoveFromGroup(memberId: number, memberName: string) {
-    if (!confirm(`Remove ${memberName} from this group? This removes them from every bill in this group.`)) return
+    if (!confirm(`Remove ${memberName} from this tab?`)) return
     setBuddyError(null)
     removeGroupMember.mutate(memberId, { onError: (err) => setBuddyError(parseApiError(err).message) })
   }
@@ -223,7 +223,7 @@ function BillReviewPage() {
 
             {availableMembers.length > 0 && (
               <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
-                <span className="text-xs text-slate-500">From this group:</span>
+                <span className="text-xs text-slate-500">On this tab:</span>
                 {availableMembers.map((member) => (
                   <span
                     key={member.id}
@@ -242,7 +242,7 @@ function BillReviewPage() {
                         type="button"
                         onClick={() => handleRemoveFromGroup(member.id, member.name)}
                         disabled={removeGroupMember.isPending}
-                        aria-label={`Remove ${member.name} from this group`}
+                        aria-label={`Remove ${member.name} from this tab`}
                         className="flex h-4 w-4 items-center justify-center rounded-full text-slate-400 transition hover:bg-error-100 hover:text-error-600 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         ×

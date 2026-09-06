@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateBillRequest;
 use App\Http\Resources\BillResource;
 use App\Models\Bill;
 use App\Models\Group;
+use App\Models\User;
 use App\Services\BillExtractionService;
 use App\Services\BillItemPriceCalculator;
 use Illuminate\Http\JsonResponse;
@@ -34,9 +35,17 @@ class BillController extends Controller
         return response()->json(['data' => BillResource::collection($bills)]);
     }
 
+    /**
+     * The name a freshly auto-created tab carries until extraction fills in
+     * the merchant name.
+     */
+    public const NEW_TAB_NAME = 'New tab';
+
     public function store(StoreBillRequest $request): JsonResponse
     {
-        $group = Group::findOrFail($request->validated('group_id'));
+        $group = $request->filled('group_id')
+            ? Group::findOrFail($request->validated('group_id'))
+            : $this->createTabFor($request->user());
 
         $this->authorizeMembership($group, $request->user()->id);
 
@@ -115,10 +124,44 @@ class BillController extends Controller
             }
 
             app(BillItemPriceCalculator::class)->recalculate($bill);
+
+            $this->nameTabAfterMerchant($bill->fresh('group'));
         } catch (Throwable $e) {
             Log::error('Bill extraction failed', ['bill_id' => $bill->id, 'error' => $e->getMessage()]);
             $bill->update(['status' => 'failed']);
         }
+    }
+
+    /**
+     * Give an auto-created tab a real name once we know the merchant, so a
+     * tab reads like its receipt instead of the "New tab" placeholder.
+     */
+    private function nameTabAfterMerchant(Bill $bill): void
+    {
+        $group = $bill->group;
+
+        if ($group && $bill->merchant_name && $group->name === self::NEW_TAB_NAME) {
+            $group->update(['name' => $bill->merchant_name]);
+        }
+    }
+
+    /**
+     * A tab is a one-bill container: created for the uploader, who becomes
+     * its first member and the payer (the collector others pay back).
+     */
+    private function createTabFor(User $user): Group
+    {
+        $group = Group::create([
+            'name' => self::NEW_TAB_NAME,
+            'created_by' => $user->id,
+        ]);
+
+        $group->members()->create([
+            'user_id' => $user->id,
+            'name' => $user->name,
+        ]);
+
+        return $group;
     }
 
     public function show(Request $request, int $id): BillResource

@@ -4,7 +4,7 @@ import type { Bill } from '@/lib/bills'
 
 const iconTones = ['bg-brand-100 text-brand-600', 'bg-sky-100 text-sky-600', 'bg-amber-100 text-amber-600']
 
-export function GroupBillsCard({ bills }: { bills: Bill[] | undefined }) {
+export function TabBillsCard({ bills }: { bills: Bill[] | undefined }) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
       <div className="flex items-center justify-between">
@@ -15,7 +15,7 @@ export function GroupBillsCard({ bills }: { bills: Bill[] | undefined }) {
       </div>
 
       <div className="mt-2">
-        {bills?.length === 0 && <p className="py-4 text-sm text-slate-500">No bills in this group yet.</p>}
+        {bills?.length === 0 && <p className="py-4 text-sm text-slate-500">No bills on this tab yet.</p>}
 
         {bills?.map((bill, i) => (
           <Link

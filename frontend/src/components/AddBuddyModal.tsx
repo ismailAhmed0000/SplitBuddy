@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useBuddies } from '@/lib/buddies'
-import { useSearchUsers } from '@/lib/groups'
+import { useSearchUsers } from '@/lib/tabs'
 
 export function AddBuddyModal({
   existingUserIds,

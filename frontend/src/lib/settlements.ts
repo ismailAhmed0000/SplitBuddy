@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './api'
-import { groupKeys } from './groups'
-import type { GroupMember } from './groups'
+import { tabKeys } from './tabs'
+import type { TabMember } from './tabs'
 
 export type Settlement = {
   id: number
@@ -11,8 +11,8 @@ export type Settlement = {
   amount: string
   note: string | null
   settled_at: string | null
-  payer?: GroupMember
-  payee?: GroupMember
+  payer?: TabMember
+  payee?: TabMember
 }
 
 export const settlementKeys = {
@@ -46,7 +46,7 @@ export function useCreateSettlement(groupId: number) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: settlementKeys.list(groupId) })
-      queryClient.invalidateQueries({ queryKey: groupKeys.balances(groupId) })
+      queryClient.invalidateQueries({ queryKey: tabKeys.balances(groupId) })
       queryClient.invalidateQueries({ queryKey: ['balances', 'user'] })
     },
   })

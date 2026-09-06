@@ -1,9 +1,8 @@
 import { useMemo, useState } from 'react'
 import { MemberAvatar } from './MemberAvatar'
-import { useAddGroupMember } from '@/lib/groups'
+import { useAddTabMember, useSearchUsers } from '@/lib/tabs'
 import { useBuddies } from '@/lib/buddies'
-import { useSearchUsers } from '@/lib/groups'
-import type { GroupMember } from '@/lib/groups'
+import type { TabMember } from '@/lib/tabs'
 
 export function MembersCard({
   groupId,
@@ -14,13 +13,13 @@ export function MembersCard({
   onRemove,
 }: {
   groupId: number
-  members: GroupMember[]
+  members: TabMember[]
   payerId: number | null
   isCreator: boolean
   currentUserId: number | undefined
   onRemove: (memberId: number, name: string) => void
 }) {
-  const addMember = useAddGroupMember(groupId)
+  const addMember = useAddTabMember(groupId)
   const { data: myBuddies } = useBuddies()
   const [query, setQuery] = useState('')
   const [isFocused, setIsFocused] = useState(false)

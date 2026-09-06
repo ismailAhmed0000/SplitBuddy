@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useExportMessages, type ExportMessagesResult } from '@/lib/groups'
+import { useExportMessages, type ExportMessagesResult } from '@/lib/tabs'
 import { MemberAvatar } from './MemberAvatar'
 
 type Member = { id: number; name: string }

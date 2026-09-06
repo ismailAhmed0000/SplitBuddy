@@ -11,11 +11,9 @@ const statusDotClass: Record<Bill['status'], string> = {
 
 export function BillRow({
   bill,
-  groupName,
   onDelete,
 }: {
   bill: Bill
-  groupName: string
   onDelete: () => void
 }) {
   const date = formatShortDate(bill.bill_date)
@@ -32,9 +30,9 @@ export function BillRow({
       <Link to="/bills/$billId" params={{ billId: String(bill.id) }} className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold text-ink">{bill.merchant_name ?? 'Receipt'}</p>
         <p className="mt-0.5 truncate text-sm text-slate-500 sm:hidden">
-          {date} · {groupName}
+          {date} · {bill.status}
         </p>
-        <p className="mt-0.5 hidden truncate text-sm text-slate-500 sm:block">{groupName}</p>
+        <p className="mt-0.5 hidden truncate text-sm text-slate-500 capitalize sm:block">{bill.status}</p>
       </Link>
 
       <span className="shrink-0 text-sm font-bold text-brand-700 sm:text-base">{money(bill.total)}</span>

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export function GroupHeader({
+export function TabHeader({
   name,
   isCreator,
   onRename,
@@ -60,7 +60,7 @@ export function GroupHeader({
           onClick={onDelete}
           className="shrink-0 rounded-full border border-error-200 px-4 py-2 text-sm font-semibold text-error-600 transition hover:bg-error-50"
         >
-          Delete group
+          Delete tab
         </button>
       )}
     </div>

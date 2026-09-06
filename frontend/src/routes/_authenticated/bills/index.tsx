@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useBills, useDeleteBill, type Bill } from '@/lib/bills'
-import { useGroups } from '@/lib/groups'
 import { formatMonthYear } from '@/lib/format'
 import { BillRow } from '@/components/BillRow'
 import { BillStatusLegend } from '@/components/BillStatusLegend'
@@ -37,10 +36,8 @@ function groupBillsByMonth(bills: Bill[]): BillMonthGroup[] {
 
 function BillsListPage() {
   const { data: bills, isLoading } = useBills()
-  const { data: groups } = useGroups()
   const deleteBill = useDeleteBill()
 
-  const groupNames = new Map(groups?.map((g) => [g.id, g.name]))
   const monthGroups = groupBillsByMonth(bills ?? [])
 
   function handleDelete(id: number) {
@@ -52,7 +49,7 @@ function BillsListPage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
       <h1 className="text-2xl font-semibold text-ink">Bills</h1>
-      <p className="mt-1 text-sm text-slate-500">Every receipt you've uploaded, across all your groups.</p>
+      <p className="mt-1 text-sm text-slate-500">Every receipt you've uploaded, across all your tabs.</p>
 
       {isLoading && <p className="mt-6 text-sm text-slate-500">Loading…</p>}
 
@@ -76,12 +73,7 @@ function BillsListPage() {
                 {group.label}
               </div>
               {group.bills.map((bill) => (
-                <BillRow
-                  key={bill.id}
-                  bill={bill}
-                  groupName={groupNames.get(bill.group_id) ?? 'Unknown group'}
-                  onDelete={() => handleDelete(bill.id)}
-                />
+                <BillRow key={bill.id} bill={bill} onDelete={() => handleDelete(bill.id)} />
               ))}
             </div>
           ))}

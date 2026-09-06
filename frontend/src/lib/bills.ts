@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './api'
-import type { GroupMember } from './groups'
+import type { TabMember } from './tabs'
 
 export type BillStatus = 'processing' | 'parsed' | 'confirmed' | 'failed'
 export type ShareType = 'equal' | 'percentage' | 'exact_amount'
@@ -11,7 +11,7 @@ export type Assignment = {
   group_member_id: number
   share_type: ShareType
   share_value: string | null
-  group_member?: GroupMember
+  group_member?: TabMember
 }
 
 export type BillItem = {
@@ -42,7 +42,7 @@ export type Bill = {
   total: string | null
   status: BillStatus
   items: BillItem[]
-  participants: GroupMember[]
+  participants: TabMember[]
 }
 
 export const billKeys = {
@@ -91,9 +91,10 @@ export function useBill(id: number | undefined) {
 
 export function useUploadBill() {
   return useMutation({
-    mutationFn: async ({ groupId, file }: { groupId: number; file: File }) => {
+    // No tab/group is chosen up front — the backend opens a fresh tab for
+    // this bill and adds the uploader as its first member + collector.
+    mutationFn: async ({ file }: { file: File }) => {
       const formData = new FormData()
-      formData.append('group_id', String(groupId))
       formData.append('image', file)
 
       const { data } = await api.post<{ data: Bill }>('/bills', formData)
@@ -112,7 +113,10 @@ export function useConfirmBill(billId: number | undefined) {
     },
     onSuccess: (bill) => {
       queryClient.setQueryData(billKeys.detail(bill.id), bill)
-      queryClient.invalidateQueries({ queryKey: ['groups', bill.group_id, 'balances'] })
+      // Confirming is what makes the tab real, so refresh its balances and
+      // the tabs list where it now appears.
+      queryClient.invalidateQueries({ queryKey: ['tabs', bill.group_id, 'balances'] })
+      queryClient.invalidateQueries({ queryKey: ['tabs'] })
     },
   })
 }
@@ -166,7 +170,7 @@ export function useAddBillParticipant(billId: number | undefined) {
 
   return useMutation({
     mutationFn: async (groupMemberId: number) => {
-      const { data } = await api.post<{ data: GroupMember }>(`/bills/${billId}/participants`, {
+      const { data } = await api.post<{ data: TabMember }>(`/bills/${billId}/participants`, {
         group_member_id: groupMemberId,
       })
       return data.data

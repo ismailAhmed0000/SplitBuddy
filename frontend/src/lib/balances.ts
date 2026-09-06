@@ -1,7 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import { api } from './api'
 
-export type GroupBalance = {
+// One row per tab the user belongs to. Wire field names stay `group_*` /
+// `groups` — the API and mobile app still call these groups.
+export type TabBalanceSummary = {
   group_id: number
   group_name: string
   group_member_id: number
@@ -13,7 +15,7 @@ export type GroupBalance = {
 }
 
 export type UserBalances = {
-  groups: GroupBalance[]
+  groups: TabBalanceSummary[]
   overall_balance: number
 }
 

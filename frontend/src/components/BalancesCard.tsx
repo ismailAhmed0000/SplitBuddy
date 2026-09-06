@@ -3,7 +3,7 @@ import { BalanceRow } from './BalanceRow'
 import { GenerateMessageModal } from './GenerateMessageModal'
 import { useCreateSettlement, useSettlements } from '@/lib/settlements'
 import { money } from '@/lib/format'
-import type { GroupBalance } from '@/lib/groups'
+import type { TabBalance } from '@/lib/tabs'
 
 export function BalancesCard({
   groupId,
@@ -13,7 +13,7 @@ export function BalancesCard({
   myMemberId,
 }: {
   groupId: number
-  balances: GroupBalance[]
+  balances: TabBalance[]
   payerId: number | null
   payerName: string | undefined
   myMemberId: number | undefined
@@ -25,7 +25,7 @@ export function BalancesCard({
   const myBalance = balances.find((b) => b.group_member_id === myMemberId)
   const canSettleUp = Boolean(payerId) && myBalance && !myBalance.is_payer && myBalance.status === 'pending'
 
-  function handlePay(member: GroupBalance) {
+  function handlePay(member: TabBalance) {
     if (!payerId) return
     const amount = Math.abs(member.balance)
     const isSelf = member.group_member_id === myMemberId
@@ -60,7 +60,7 @@ export function BalancesCard({
           return (
             <BalanceRow
               key={member.group_member_id}
-              groupId={groupId}
+              tabId={groupId}
               member={member}
               canMarkPaid={Boolean(canMarkPaid)}
               onMarkPaid={() => handlePay(member)}

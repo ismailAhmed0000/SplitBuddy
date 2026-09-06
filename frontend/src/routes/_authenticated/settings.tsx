@@ -119,7 +119,7 @@ function SettingsForm({ user }: { user: User }) {
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-sm font-semibold text-ink">Bank details</h2>
           <p className="mt-1 text-xs text-slate-500">
-            Shown to your group buddies so they know where to send money — SplitBuddy doesn't process payments.
+            Shown to your buddies so they know where to send money — SplitBuddy doesn't process payments.
           </p>
           <div className="mt-4 flex flex-col gap-4">
             <TextField

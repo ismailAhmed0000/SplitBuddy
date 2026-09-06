@@ -6,8 +6,8 @@ import { FourDotMark } from '@/components/BrandMark'
 
 const navLinks = [
   { to: '/', label: 'Dashboard' },
-  { to: '/groups', label: 'Groups' },
   { to: '/bills', label: 'Bills' },
+  { to: '/tabs', label: 'Tabs' },
   { to: '/buddies', label: 'Buddies' },
 ] as const
 

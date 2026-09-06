@@ -19,9 +19,9 @@ import { Route as AuthenticatedBillsIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedBillsBillIdRouteImport } from './routes/_authenticated/bills/$billId'
 import { Route as AuthenticatedBuddiesIndexRouteImport } from './routes/_authenticated/buddies/index'
 import { Route as AuthenticatedBuddiesBuddyIdRouteImport } from './routes/_authenticated/buddies/$buddyId'
-import { Route as AuthenticatedGroupsIndexRouteImport } from './routes/_authenticated/groups/index'
-import { Route as AuthenticatedGroupsGroupIdRouteImport } from './routes/_authenticated/groups/$groupId'
-import { Route as AuthenticatedGroupsGroupIdMembersMemberIdRouteImport } from './routes/_authenticated/groups/$groupId.members.$memberId'
+import { Route as AuthenticatedTabsIndexRouteImport } from './routes/_authenticated/tabs/index'
+import { Route as AuthenticatedTabsTabIdRouteImport } from './routes/_authenticated/tabs/$tabId'
+import { Route as AuthenticatedTabsTabIdMembersMemberIdRouteImport } from './routes/_authenticated/tabs/$tabId.members.$memberId'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -75,23 +75,21 @@ const AuthenticatedBuddiesBuddyIdRoute =
     path: '/buddies/$buddyId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedGroupsIndexRoute =
-  AuthenticatedGroupsIndexRouteImport.update({
-    id: '/groups/',
-    path: '/groups/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedGroupsGroupIdRoute =
-  AuthenticatedGroupsGroupIdRouteImport.update({
-    id: '/groups/$groupId',
-    path: '/groups/$groupId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedGroupsGroupIdMembersMemberIdRoute =
-  AuthenticatedGroupsGroupIdMembersMemberIdRouteImport.update({
+const AuthenticatedTabsIndexRoute = AuthenticatedTabsIndexRouteImport.update({
+  id: '/tabs/',
+  path: '/tabs/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedTabsTabIdRoute = AuthenticatedTabsTabIdRouteImport.update({
+  id: '/tabs/$tabId',
+  path: '/tabs/$tabId',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedTabsTabIdMembersMemberIdRoute =
+  AuthenticatedTabsTabIdMembersMemberIdRouteImport.update({
     id: '/members/$memberId',
     path: '/members/$memberId',
-    getParentRoute: () => AuthenticatedGroupsGroupIdRoute,
+    getParentRoute: () => AuthenticatedTabsTabIdRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -102,11 +100,11 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/bills/$billId': typeof AuthenticatedBillsBillIdRoute
   '/buddies/$buddyId': typeof AuthenticatedBuddiesBuddyIdRoute
-  '/groups/$groupId': typeof AuthenticatedGroupsGroupIdRouteWithChildren
+  '/tabs/$tabId': typeof AuthenticatedTabsTabIdRouteWithChildren
   '/bills/': typeof AuthenticatedBillsIndexRoute
   '/buddies/': typeof AuthenticatedBuddiesIndexRoute
-  '/groups/': typeof AuthenticatedGroupsIndexRoute
-  '/groups/$groupId/members/$memberId': typeof AuthenticatedGroupsGroupIdMembersMemberIdRoute
+  '/tabs/': typeof AuthenticatedTabsIndexRoute
+  '/tabs/$tabId/members/$memberId': typeof AuthenticatedTabsTabIdMembersMemberIdRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -116,11 +114,11 @@ export interface FileRoutesByTo {
   '/': typeof AuthenticatedIndexRoute
   '/bills/$billId': typeof AuthenticatedBillsBillIdRoute
   '/buddies/$buddyId': typeof AuthenticatedBuddiesBuddyIdRoute
-  '/groups/$groupId': typeof AuthenticatedGroupsGroupIdRouteWithChildren
+  '/tabs/$tabId': typeof AuthenticatedTabsTabIdRouteWithChildren
   '/bills': typeof AuthenticatedBillsIndexRoute
   '/buddies': typeof AuthenticatedBuddiesIndexRoute
-  '/groups': typeof AuthenticatedGroupsIndexRoute
-  '/groups/$groupId/members/$memberId': typeof AuthenticatedGroupsGroupIdMembersMemberIdRoute
+  '/tabs': typeof AuthenticatedTabsIndexRoute
+  '/tabs/$tabId/members/$memberId': typeof AuthenticatedTabsTabIdMembersMemberIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -132,11 +130,11 @@ export interface FileRoutesById {
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/bills/$billId': typeof AuthenticatedBillsBillIdRoute
   '/_authenticated/buddies/$buddyId': typeof AuthenticatedBuddiesBuddyIdRoute
-  '/_authenticated/groups/$groupId': typeof AuthenticatedGroupsGroupIdRouteWithChildren
+  '/_authenticated/tabs/$tabId': typeof AuthenticatedTabsTabIdRouteWithChildren
   '/_authenticated/bills/': typeof AuthenticatedBillsIndexRoute
   '/_authenticated/buddies/': typeof AuthenticatedBuddiesIndexRoute
-  '/_authenticated/groups/': typeof AuthenticatedGroupsIndexRoute
-  '/_authenticated/groups/$groupId/members/$memberId': typeof AuthenticatedGroupsGroupIdMembersMemberIdRoute
+  '/_authenticated/tabs/': typeof AuthenticatedTabsIndexRoute
+  '/_authenticated/tabs/$tabId/members/$memberId': typeof AuthenticatedTabsTabIdMembersMemberIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -148,11 +146,11 @@ export interface FileRouteTypes {
     | '/settings'
     | '/bills/$billId'
     | '/buddies/$buddyId'
-    | '/groups/$groupId'
+    | '/tabs/$tabId'
     | '/bills/'
     | '/buddies/'
-    | '/groups/'
-    | '/groups/$groupId/members/$memberId'
+    | '/tabs/'
+    | '/tabs/$tabId/members/$memberId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -162,11 +160,11 @@ export interface FileRouteTypes {
     | '/'
     | '/bills/$billId'
     | '/buddies/$buddyId'
-    | '/groups/$groupId'
+    | '/tabs/$tabId'
     | '/bills'
     | '/buddies'
-    | '/groups'
-    | '/groups/$groupId/members/$memberId'
+    | '/tabs'
+    | '/tabs/$tabId/members/$memberId'
   id:
     | '__root__'
     | '/_authenticated'
@@ -177,11 +175,11 @@ export interface FileRouteTypes {
     | '/_authenticated/'
     | '/_authenticated/bills/$billId'
     | '/_authenticated/buddies/$buddyId'
-    | '/_authenticated/groups/$groupId'
+    | '/_authenticated/tabs/$tabId'
     | '/_authenticated/bills/'
     | '/_authenticated/buddies/'
-    | '/_authenticated/groups/'
-    | '/_authenticated/groups/$groupId/members/$memberId'
+    | '/_authenticated/tabs/'
+    | '/_authenticated/tabs/$tabId/members/$memberId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -263,43 +261,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBuddiesBuddyIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/groups/': {
-      id: '/_authenticated/groups/'
-      path: '/groups'
-      fullPath: '/groups/'
-      preLoaderRoute: typeof AuthenticatedGroupsIndexRouteImport
+    '/_authenticated/tabs/': {
+      id: '/_authenticated/tabs/'
+      path: '/tabs'
+      fullPath: '/tabs/'
+      preLoaderRoute: typeof AuthenticatedTabsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/groups/$groupId': {
-      id: '/_authenticated/groups/$groupId'
-      path: '/groups/$groupId'
-      fullPath: '/groups/$groupId'
-      preLoaderRoute: typeof AuthenticatedGroupsGroupIdRouteImport
+    '/_authenticated/tabs/$tabId': {
+      id: '/_authenticated/tabs/$tabId'
+      path: '/tabs/$tabId'
+      fullPath: '/tabs/$tabId'
+      preLoaderRoute: typeof AuthenticatedTabsTabIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/groups/$groupId/members/$memberId': {
-      id: '/_authenticated/groups/$groupId/members/$memberId'
+    '/_authenticated/tabs/$tabId/members/$memberId': {
+      id: '/_authenticated/tabs/$tabId/members/$memberId'
       path: '/members/$memberId'
-      fullPath: '/groups/$groupId/members/$memberId'
-      preLoaderRoute: typeof AuthenticatedGroupsGroupIdMembersMemberIdRouteImport
-      parentRoute: typeof AuthenticatedGroupsGroupIdRoute
+      fullPath: '/tabs/$tabId/members/$memberId'
+      preLoaderRoute: typeof AuthenticatedTabsTabIdMembersMemberIdRouteImport
+      parentRoute: typeof AuthenticatedTabsTabIdRoute
     }
   }
 }
 
-interface AuthenticatedGroupsGroupIdRouteChildren {
-  AuthenticatedGroupsGroupIdMembersMemberIdRoute: typeof AuthenticatedGroupsGroupIdMembersMemberIdRoute
+interface AuthenticatedTabsTabIdRouteChildren {
+  AuthenticatedTabsTabIdMembersMemberIdRoute: typeof AuthenticatedTabsTabIdMembersMemberIdRoute
 }
 
-const AuthenticatedGroupsGroupIdRouteChildren: AuthenticatedGroupsGroupIdRouteChildren =
+const AuthenticatedTabsTabIdRouteChildren: AuthenticatedTabsTabIdRouteChildren =
   {
-    AuthenticatedGroupsGroupIdMembersMemberIdRoute:
-      AuthenticatedGroupsGroupIdMembersMemberIdRoute,
+    AuthenticatedTabsTabIdMembersMemberIdRoute:
+      AuthenticatedTabsTabIdMembersMemberIdRoute,
   }
 
-const AuthenticatedGroupsGroupIdRouteWithChildren =
-  AuthenticatedGroupsGroupIdRoute._addFileChildren(
-    AuthenticatedGroupsGroupIdRouteChildren,
+const AuthenticatedTabsTabIdRouteWithChildren =
+  AuthenticatedTabsTabIdRoute._addFileChildren(
+    AuthenticatedTabsTabIdRouteChildren,
   )
 
 interface AuthenticatedRouteRouteChildren {
@@ -307,10 +305,10 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedBillsBillIdRoute: typeof AuthenticatedBillsBillIdRoute
   AuthenticatedBuddiesBuddyIdRoute: typeof AuthenticatedBuddiesBuddyIdRoute
-  AuthenticatedGroupsGroupIdRoute: typeof AuthenticatedGroupsGroupIdRouteWithChildren
+  AuthenticatedTabsTabIdRoute: typeof AuthenticatedTabsTabIdRouteWithChildren
   AuthenticatedBillsIndexRoute: typeof AuthenticatedBillsIndexRoute
   AuthenticatedBuddiesIndexRoute: typeof AuthenticatedBuddiesIndexRoute
-  AuthenticatedGroupsIndexRoute: typeof AuthenticatedGroupsIndexRoute
+  AuthenticatedTabsIndexRoute: typeof AuthenticatedTabsIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -318,10 +316,10 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedBillsBillIdRoute: AuthenticatedBillsBillIdRoute,
   AuthenticatedBuddiesBuddyIdRoute: AuthenticatedBuddiesBuddyIdRoute,
-  AuthenticatedGroupsGroupIdRoute: AuthenticatedGroupsGroupIdRouteWithChildren,
+  AuthenticatedTabsTabIdRoute: AuthenticatedTabsTabIdRouteWithChildren,
   AuthenticatedBillsIndexRoute: AuthenticatedBillsIndexRoute,
   AuthenticatedBuddiesIndexRoute: AuthenticatedBuddiesIndexRoute,
-  AuthenticatedGroupsIndexRoute: AuthenticatedGroupsIndexRoute,
+  AuthenticatedTabsIndexRoute: AuthenticatedTabsIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

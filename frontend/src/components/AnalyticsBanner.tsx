@@ -24,7 +24,7 @@ export function AnalyticsBanner() {
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
       <StatCard label="You're owed" value={currency.format(owed)} icon={<SettledIcon />} tone="brand" />
       <StatCard label="You owe" value={currency.format(owing)} icon={<DollarIcon />} tone="error" />
-      <StatCard label="Active groups" value={String(groups.length)} icon={<GroupsIcon />} tone="slate" />
+      <StatCard label="Active tabs" value={String(groups.length)} icon={<GroupsIcon />} tone="slate" />
     </div>
   )
 }

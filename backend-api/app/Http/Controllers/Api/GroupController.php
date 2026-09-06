@@ -23,10 +23,14 @@ class GroupController extends Controller
         $userId = $request->user()->id;
 
         $groups = Group::query()
-            ->where('created_by', $userId)
-            ->orWhereHas('members', fn ($query) => $query->where('user_id', $userId))
+            ->where(fn ($query) => $query->where('created_by', $userId)
+                ->orWhereHas('members', fn ($q) => $q->where('user_id', $userId)))
+            ->when(
+                $request->boolean('confirmed'),
+                fn ($query) => $query->whereHas('bills', fn ($q) => $q->where('status', 'confirmed')),
+            )
             ->with('creator')
-            ->withCount('members')
+            ->withCount(['members', 'bills'])
             ->get();
 
         return response()->json(['data' => GroupResource::collection($groups)]);

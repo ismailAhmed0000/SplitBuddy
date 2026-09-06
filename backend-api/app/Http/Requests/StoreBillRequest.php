@@ -23,7 +23,7 @@ class StoreBillRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'group_id' => ['required', 'integer', 'exists:groups,id'],
+            'group_id' => ['sometimes', 'integer', 'exists:groups,id'],
             'image' => ['required', 'file', 'mimes:jpeg,jpg,png,webp', 'max:7168'],
         ];
     }

@@ -1,6 +1,6 @@
 import type { BillItem } from '@/lib/bills'
 import { useCreateAssignment, useDeleteAssignment } from '@/lib/bills'
-import type { GroupMember } from '@/lib/groups'
+import type { TabMember } from '@/lib/tabs'
 import { money } from '@/lib/format'
 
 export function ItemAssignmentRow({
@@ -10,7 +10,7 @@ export function ItemAssignmentRow({
 }: {
   billId: number
   item: BillItem
-  members: GroupMember[]
+  members: TabMember[]
 }) {
   const createAssignment = useCreateAssignment(billId)
   const deleteAssignment = useDeleteAssignment(billId)
@@ -20,7 +20,7 @@ export function ItemAssignmentRow({
   const hasLoadedCharges = Math.abs(loadedPrice - Number(item.total_price)) >= 0.005
   const share = assignedCount > 0 ? loadedPrice / assignedCount : 0
 
-  function toggle(member: GroupMember, checked: boolean) {
+  function toggle(member: TabMember, checked: boolean) {
     if (checked) {
       createAssignment.mutate({ itemId: item.id, groupMemberId: member.id })
     } else {

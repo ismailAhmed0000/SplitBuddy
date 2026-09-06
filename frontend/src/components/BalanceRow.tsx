@@ -1,17 +1,17 @@
 import { Link } from '@tanstack/react-router'
 import { MemberAvatar } from './MemberAvatar'
 import { money } from '@/lib/format'
-import type { GroupBalance } from '@/lib/groups'
+import type { TabBalance } from '@/lib/tabs'
 
 export function BalanceRow({
-  groupId,
+  tabId,
   member,
   canMarkPaid,
   onMarkPaid,
   pending,
 }: {
-  groupId: number
-  member: GroupBalance
+  tabId: number
+  member: TabBalance
   canMarkPaid: boolean
   onMarkPaid: () => void
   pending: boolean
@@ -21,8 +21,8 @@ export function BalanceRow({
   return (
     <div className="flex items-center justify-between gap-3 border-b border-slate-100 py-3 last:border-b-0">
       <Link
-        to="/groups/$groupId/members/$memberId"
-        params={{ groupId: String(groupId), memberId: String(member.group_member_id) }}
+        to="/tabs/$tabId/members/$memberId"
+        params={{ tabId: String(tabId), memberId: String(member.group_member_id) }}
         className="flex min-w-0 flex-1 items-center gap-3 transition hover:opacity-80"
       >
         <MemberAvatar name={member.name} isCollector={member.is_payer} />

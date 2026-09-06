@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useGroupMember } from '@/lib/groups'
+import { useTabMember } from '@/lib/tabs'
 import { money } from '@/lib/format'
 
-export const Route = createFileRoute('/_authenticated/groups/$groupId/members/$memberId')({
-  component: GroupMemberDetailPage,
+export const Route = createFileRoute('/_authenticated/tabs/$tabId/members/$memberId')({
+  component: TabMemberDetailPage,
 })
 
 const statusStyles: Record<string, string> = {
@@ -13,9 +13,9 @@ const statusStyles: Record<string, string> = {
   failed: 'bg-error-100 text-error-700',
 }
 
-function GroupMemberDetailPage() {
-  const { groupId, memberId } = Route.useParams()
-  const { data: member, isLoading } = useGroupMember(Number(groupId), Number(memberId))
+function TabMemberDetailPage() {
+  const { tabId, memberId } = Route.useParams()
+  const { data: member, isLoading } = useTabMember(Number(tabId), Number(memberId))
 
   if (isLoading || !member) {
     return (
@@ -33,11 +33,11 @@ function GroupMemberDetailPage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
       <Link
-        to="/groups/$groupId"
-        params={{ groupId }}
+        to="/tabs/$tabId"
+        params={{ tabId }}
         className="text-sm font-medium text-brand-600 hover:text-brand-700"
       >
-        ← Back to group
+        ← Back to tab
       </Link>
 
       <div className="mt-3 flex items-center justify-between gap-4">
