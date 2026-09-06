@@ -26,15 +26,9 @@ export function TabHeader({
     setIsEditing(false)
   }
 
-  const initial = name.trim().charAt(0).toUpperCase() || '?'
-
   return (
     <div className="flex flex-wrap items-start justify-between gap-4">
       <div className="flex min-w-0 items-center gap-4">
-        <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-brand-100 text-2xl font-bold text-brand-700 sm:h-16 sm:w-16 sm:text-3xl">
-          {initial}
-        </span>
-
         {isEditing ? (
           <input
             autoFocus

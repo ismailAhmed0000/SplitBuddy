@@ -118,6 +118,7 @@ export function useUpdateTab(tabId: number) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: tabKeys.detail(tabId) })
+      queryClient.invalidateQueries({ queryKey: tabKeys.balances(tabId) })
       queryClient.invalidateQueries({ queryKey: tabKeys.list })
     },
   })

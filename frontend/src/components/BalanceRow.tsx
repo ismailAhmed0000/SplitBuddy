@@ -30,7 +30,7 @@ export function BalanceRow({
           <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
             <span className="max-w-full truncate text-sm font-semibold text-ink">{member.name}</span>
             {member.is_payer && (
-              <span className="shrink-0 rounded-full bg-brand-100 px-2 py-0.5 text-[10px] font-bold tracking-wide text-brand-700 uppercase">
+              <span className="shrink-0 -rotate-6 rounded-full border-2 border-brand-500 px-2.5 py-0.5 text-[10px] font-bold tracking-wide text-brand-600 uppercase">
                 Collector
               </span>
             )}

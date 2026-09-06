@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { BalanceRow } from './BalanceRow'
+import { ConfirmDialog } from './ConfirmDialog'
 import { GenerateMessageModal } from './GenerateMessageModal'
 import { useCreateSettlement, useSettlements } from '@/lib/settlements'
 import { money } from '@/lib/format'
@@ -21,19 +22,20 @@ export function BalancesCard({
   const { data: settlements } = useSettlements(groupId)
   const createSettlement = useCreateSettlement(groupId)
   const [isMessageModalOpen, setIsMessageModalOpen] = useState(false)
+  const [pendingPay, setPendingPay] = useState<TabBalance | null>(null)
 
   const myBalance = balances.find((b) => b.group_member_id === myMemberId)
   const canSettleUp = Boolean(payerId) && myBalance && !myBalance.is_payer && myBalance.status === 'pending'
 
-  function handlePay(member: TabBalance) {
-    if (!payerId) return
-    const amount = Math.abs(member.balance)
-    const isSelf = member.group_member_id === myMemberId
-    const message = isSelf
-      ? `Pay ${money(amount)} to ${payerName ?? 'the payer'}?`
-      : `Mark ${member.name} as paid ${money(amount)}?`
-    if (!confirm(message)) return
-    createSettlement.mutate({ paidBy: member.group_member_id, paidTo: payerId, amount })
+  const payIsSelf = pendingPay?.group_member_id === myMemberId
+  const payAmount = pendingPay ? Math.abs(pendingPay.balance) : 0
+
+  function confirmPay() {
+    if (!pendingPay || !payerId) return
+    createSettlement.mutate(
+      { paidBy: pendingPay.group_member_id, paidTo: payerId, amount: Math.abs(pendingPay.balance) },
+      { onSettled: () => setPendingPay(null) },
+    )
   }
 
   return (
@@ -63,7 +65,7 @@ export function BalancesCard({
               tabId={groupId}
               member={member}
               canMarkPaid={Boolean(canMarkPaid)}
-              onMarkPaid={() => handlePay(member)}
+              onMarkPaid={() => setPendingPay(member)}
               pending={createSettlement.isPending}
             />
           )
@@ -73,7 +75,7 @@ export function BalancesCard({
       {canSettleUp && myBalance && (
         <button
           type="button"
-          onClick={() => handlePay(myBalance)}
+          onClick={() => setPendingPay(myBalance)}
           disabled={createSettlement.isPending}
           className="mt-4 w-full rounded-xl bg-brand-600 py-3 text-sm font-bold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
@@ -99,6 +101,29 @@ export function BalancesCard({
           groupId={groupId}
           members={balances.map((b) => ({ id: b.group_member_id, name: b.name }))}
           onClose={() => setIsMessageModalOpen(false)}
+        />
+      )}
+
+      {pendingPay && (
+        <ConfirmDialog
+          title={payIsSelf ? 'Settle up' : `Mark ${pendingPay.name} as paid`}
+          message={
+            payIsSelf ? (
+              <>
+                Record that you paid <span className="font-semibold text-ink">{money(payAmount)}</span> to{' '}
+                {payerName ?? 'the collector'}?
+              </>
+            ) : (
+              <>
+                Record that <span className="font-semibold text-ink">{pendingPay.name}</span> paid{' '}
+                <span className="font-semibold text-ink">{money(payAmount)}</span> to {payerName ?? 'the collector'}?
+              </>
+            )
+          }
+          confirmLabel={payIsSelf ? 'I paid' : 'Mark paid'}
+          isPending={createSettlement.isPending}
+          onConfirm={confirmPay}
+          onCancel={() => setPendingPay(null)}
         />
       )}
     </div>
