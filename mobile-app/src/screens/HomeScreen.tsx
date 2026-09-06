@@ -87,14 +87,14 @@ export default function HomeScreen({ navigation }: Props) {
         <Card className="flex-row items-center justify-between">
           <View className="flex-row items-center gap-3">
             <View className="h-10 w-10 items-center justify-center rounded-full bg-teal-100">
-              <GroupIcon size={19} color="#0D9488" />
+              <GroupIcon size={19} color="#1A1A1A" />
             </View>
             <View>
               <Text className="text-sm font-semibold text-gray-900">Groups</Text>
               <Text className="mt-0.5 text-xs text-gray-500">See your groups and balances</Text>
             </View>
           </View>
-          <ChevronRightIcon size={18} color="#D1D5DB" />
+          <ChevronRightIcon size={18} color="#DCDCDC" />
         </Card>
       </TouchableOpacity>
 

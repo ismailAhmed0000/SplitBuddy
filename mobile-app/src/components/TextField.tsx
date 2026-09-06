@@ -10,7 +10,7 @@ export function TextField({ label, error, className, ...props }: TextFieldProps)
     <View className="gap-1.5">
       {label && <Text className="text-sm font-medium text-gray-700">{label}</Text>}
       <TextInput
-        placeholderTextColor="#9CA3AF"
+        placeholderTextColor="#AEAEB2"
         className={`rounded-xl border bg-gray-50 px-3.5 py-3 text-base text-gray-900 ${error ? 'border-red-400' : 'border-gray-200'} ${className ?? ''}`}
         {...props}
       />

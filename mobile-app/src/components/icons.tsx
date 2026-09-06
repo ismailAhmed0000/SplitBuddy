@@ -14,7 +14,7 @@ export function PlusIcon({ size = 20, color = '#FFFFFF' }: IconProps) {
   );
 }
 
-export function CheckIcon({ size = 16, color = '#2B2B2B' }: IconProps) {
+export function CheckIcon({ size = 16, color = '#1A1A1A' }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <Path
@@ -61,7 +61,7 @@ export function BikeIcon({ size = 16, color = '#FFFFFF' }: IconProps) {
   );
 }
 
-export function BellIcon({ size = 22, color = '#111827' }: IconProps) {
+export function BellIcon({ size = 22, color = '#1A1A1A' }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <Path
@@ -75,7 +75,7 @@ export function BellIcon({ size = 22, color = '#111827' }: IconProps) {
   );
 }
 
-export function HomeIcon({ size = 22, color = '#111827', filled = false }: IconProps) {
+export function HomeIcon({ size = 22, color = '#1A1A1A', filled = false }: IconProps) {
   if (filled) {
     return (
       <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
@@ -96,7 +96,7 @@ export function HomeIcon({ size = 22, color = '#111827', filled = false }: IconP
   );
 }
 
-export function BuddiesIcon({ size = 22, color = '#111827', filled = false }: IconProps) {
+export function BuddiesIcon({ size = 22, color = '#1A1A1A', filled = false }: IconProps) {
   if (filled) {
     return (
       <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
@@ -115,7 +115,7 @@ export function BuddiesIcon({ size = 22, color = '#111827', filled = false }: Ic
   );
 }
 
-export function BillsIcon({ size = 22, color = '#111827', filled = false }: IconProps) {
+export function BillsIcon({ size = 22, color = '#1A1A1A', filled = false }: IconProps) {
   if (filled) {
     return (
       <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
@@ -136,7 +136,7 @@ export function BillsIcon({ size = 22, color = '#111827', filled = false }: Icon
   );
 }
 
-export function ChevronLeftIcon({ size = 20, color = '#111827' }: IconProps) {
+export function ChevronLeftIcon({ size = 20, color = '#1A1A1A' }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <Path d="M15 5L8 12L15 19" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
@@ -144,7 +144,7 @@ export function ChevronLeftIcon({ size = 20, color = '#111827' }: IconProps) {
   );
 }
 
-export function ChevronRightIcon({ size = 20, color = '#111827' }: IconProps) {
+export function ChevronRightIcon({ size = 20, color = '#1A1A1A' }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <Path d="M9 5L16 12L9 19" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
@@ -152,7 +152,7 @@ export function ChevronRightIcon({ size = 20, color = '#111827' }: IconProps) {
   );
 }
 
-export function ChevronDownIcon({ size = 16, color = '#9CA3AF' }: IconProps) {
+export function ChevronDownIcon({ size = 16, color = '#AEAEB2' }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <Path d="M6 9L12 15L18 9" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
@@ -160,7 +160,7 @@ export function ChevronDownIcon({ size = 16, color = '#9CA3AF' }: IconProps) {
   );
 }
 
-export function CloseIcon({ size = 18, color = '#6B7280' }: IconProps) {
+export function CloseIcon({ size = 18, color = '#8E8E93' }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <Path d="M6 18L18 6M6 6l12 12" stroke={color} strokeWidth={2} strokeLinecap="round" />
@@ -168,7 +168,7 @@ export function CloseIcon({ size = 18, color = '#6B7280' }: IconProps) {
   );
 }
 
-export function SearchIcon({ size = 18, color = '#9CA3AF' }: IconProps) {
+export function SearchIcon({ size = 18, color = '#AEAEB2' }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <Circle cx="11" cy="11" r="6.5" stroke={color} strokeWidth={1.8} />
@@ -177,7 +177,7 @@ export function SearchIcon({ size = 18, color = '#9CA3AF' }: IconProps) {
   );
 }
 
-export function TrashIcon({ size = 18, color = '#9CA3AF' }: IconProps) {
+export function TrashIcon({ size = 18, color = '#AEAEB2' }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <Path
@@ -191,7 +191,7 @@ export function TrashIcon({ size = 18, color = '#9CA3AF' }: IconProps) {
   );
 }
 
-export function EditIcon({ size = 16, color = '#6B7280' }: IconProps) {
+export function EditIcon({ size = 16, color = '#8E8E93' }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <Path
@@ -204,7 +204,7 @@ export function EditIcon({ size = 16, color = '#6B7280' }: IconProps) {
   );
 }
 
-export function CameraIcon({ size = 22, color = '#0D9488' }: IconProps) {
+export function CameraIcon({ size = 22, color = '#1A1A1A' }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <Path
@@ -218,7 +218,7 @@ export function CameraIcon({ size = 22, color = '#0D9488' }: IconProps) {
   );
 }
 
-export function ImageIcon({ size = 22, color = '#0D9488' }: IconProps) {
+export function ImageIcon({ size = 22, color = '#1A1A1A' }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <Path d="M4.5 5.5h15A1 1 0 0 1 20.5 6.5v11A1 1 0 0 1 19.5 18.5h-15A1 1 0 0 1 3.5 17.5v-11A1 1 0 0 1 4.5 5.5Z" stroke={color} strokeWidth={1.6} strokeLinejoin="round" />
@@ -228,7 +228,7 @@ export function ImageIcon({ size = 22, color = '#0D9488' }: IconProps) {
   );
 }
 
-export function GroupIcon({ size = 22, color = '#111827' }: IconProps) {
+export function GroupIcon({ size = 22, color = '#1A1A1A' }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <Path
@@ -252,7 +252,7 @@ export function SwapIcon({ size = 18, color = '#FFFFFF' }: IconProps) {
   );
 }
 
-export function WarningIcon({ size = 22, color = '#EF4444' }: IconProps) {
+export function WarningIcon({ size = 22, color = '#FF3B30' }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <Path
@@ -267,7 +267,7 @@ export function WarningIcon({ size = 22, color = '#EF4444' }: IconProps) {
   );
 }
 
-export function ReceiptEmptyIcon({ size = 40, color = '#D1D5DB' }: IconProps) {
+export function ReceiptEmptyIcon({ size = 40, color = '#DCDCDC' }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <Path

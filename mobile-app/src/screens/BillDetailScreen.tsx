@@ -81,7 +81,7 @@ export default function BillDetailScreen({ route, navigation }: Props) {
 
       {bill.status === 'processing' && (
         <View className="mt-6 items-center gap-3 rounded-2xl border border-gray-200 bg-white p-10">
-          <ActivityIndicator size="large" color="#0D9488" />
+          <ActivityIndicator size="large" color="#1A1A1A" />
           <Text className="text-sm font-medium text-gray-700">Reading your receipt…</Text>
           <Text className="text-sm text-gray-500">This usually takes a few seconds.</Text>
         </View>
@@ -114,11 +114,11 @@ export default function BillDetailScreen({ route, navigation }: Props) {
           </Card>
 
           {bill.status === 'parsed' && (
-            <View className="mt-6 flex-row items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
-              <Text className="flex-1 text-sm text-amber-800">
+            <View className="mt-6 flex-row items-center justify-between gap-3 rounded-2xl border border-gray-200 bg-gray-50 p-4">
+              <Text className="flex-1 text-sm text-gray-700">
                 Assign items below, then confirm so this bill counts toward balances.
               </Text>
-              <Button label={isConfirming ? 'Confirming…' : 'Confirm'} onPress={() => confirmBill(bill.id)} loading={isConfirming} className="bg-amber-500 px-4 py-2.5" />
+              <Button label={isConfirming ? 'Confirming…' : 'Confirm'} onPress={() => confirmBill(bill.id)} loading={isConfirming} className="px-4 py-2.5" />
             </View>
           )}
 

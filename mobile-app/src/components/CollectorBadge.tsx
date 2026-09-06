@@ -41,14 +41,14 @@ export function CollectorBadge({
   pending?: boolean;
 }) {
   if (isPayer) {
-    return <Seal fill="#00a86b" stroke="#006b44" textColor="#ffffff" label="COLLECTOR" />;
+    return <Seal fill="#1A1A1A" stroke="#000000" textColor="#ffffff" label="COLLECTOR" />;
   }
 
   if (!canSet) return null;
 
   return (
     <TouchableOpacity onPress={onSetPayer} disabled={pending} accessibilityLabel="Set as collector" activeOpacity={0.7}>
-      <Seal fill="#94a3b8" stroke="#64748b" textColor="#ffffff" label="COLLECTOR" />
+      <Seal fill="#8E8E93" stroke="#6A6A6E" textColor="#ffffff" label="COLLECTOR" />
     </TouchableOpacity>
   );
 }

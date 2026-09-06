@@ -168,14 +168,14 @@ function BuddiesAndBillsSection({
         <View className="flex-row rounded-full bg-gray-100 p-1">
           <TouchableOpacity
             onPress={() => setTab('buddies')}
-            style={tab === 'buddies' ? { shadowColor: '#111827', shadowOpacity: 0.06, shadowRadius: 4, shadowOffset: { width: 0, height: 1 }, elevation: 1 } : undefined}
+            style={tab === 'buddies' ? { shadowColor: '#1A1A1A', shadowOpacity: 0.06, shadowRadius: 4, shadowOffset: { width: 0, height: 1 }, elevation: 1 } : undefined}
             className={`rounded-full px-5 py-1.5 ${tab === 'buddies' ? 'bg-white' : ''}`}
           >
             <Text className={`text-sm font-medium ${tab === 'buddies' ? 'text-gray-900' : 'text-gray-400'}`}>Buddies</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => setTab('bills')}
-            style={tab === 'bills' ? { shadowColor: '#111827', shadowOpacity: 0.06, shadowRadius: 4, shadowOffset: { width: 0, height: 1 }, elevation: 1 } : undefined}
+            style={tab === 'bills' ? { shadowColor: '#1A1A1A', shadowOpacity: 0.06, shadowRadius: 4, shadowOffset: { width: 0, height: 1 }, elevation: 1 } : undefined}
             className={`rounded-full px-5 py-1.5 ${tab === 'bills' ? 'bg-white' : ''}`}
           >
             <Text className={`text-sm font-medium ${tab === 'bills' ? 'text-gray-900' : 'text-gray-400'}`}>Bills</Text>

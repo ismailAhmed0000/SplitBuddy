@@ -31,7 +31,7 @@ export function Button({ label, onPress, variant = 'primary', disabled, loading,
       className={`items-center justify-center rounded-xl px-4 py-3 ${styles.container} ${isDisabled ? 'opacity-50' : ''} ${className ?? ''}`}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? '#FFFFFF' : '#0D9488'} />
+        <ActivityIndicator color={variant === 'primary' ? '#FFFFFF' : '#1A1A1A'} />
       ) : (
         <Text className={`text-sm font-semibold ${styles.text}`}>{label}</Text>
       )}

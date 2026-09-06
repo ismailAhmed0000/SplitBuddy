@@ -2,9 +2,9 @@ import { Text, View } from 'react-native';
 import type { BillStatus } from '../types/models';
 
 const STATUS_STYLES: Record<BillStatus, { container: string; text: string }> = {
-  processing: { container: 'bg-amber-50', text: 'text-amber-700' },
-  parsed: { container: 'bg-sky-100', text: 'text-sky-700' },
-  confirmed: { container: 'bg-emerald-50', text: 'text-emerald-600' },
+  processing: { container: 'bg-gray-100', text: 'text-gray-500' },
+  parsed: { container: 'bg-gray-100', text: 'text-gray-700' },
+  confirmed: { container: 'bg-emerald-50', text: 'text-emerald-700' },
   failed: { container: 'bg-red-50', text: 'text-red-600' },
 };
 

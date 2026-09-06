@@ -34,7 +34,7 @@ export function BottomTabBar({ state, navigation, insets }: BottomTabBarProps) {
             accessibilityState={isFocused ? { selected: true } : {}}
             className="items-center justify-center py-1"
           >
-            <Icon size={28} color={isFocused ? '#111827' : '#9CA3AF'} filled={isFocused} />
+            <Icon size={28} color={isFocused ? '#1A1A1A' : '#AEAEB2'} filled={isFocused} />
           </TouchableOpacity>
         );
       })}
