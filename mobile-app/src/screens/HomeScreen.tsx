@@ -10,7 +10,7 @@ import { BellIcon, ChevronRightIcon, GroupIcon } from '../components/icons';
 import { UploadBillCard } from '../components/UploadBillCard';
 import { Avatar } from '../components/Avatar';
 import { Card } from '../components/Card';
-import { money } from '../utils/format';
+import { HomeAnalytics } from '../components/HomeAnalytics';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'HomeMain'>;
 
@@ -73,19 +73,14 @@ export default function HomeScreen({ navigation }: Props) {
       </View>
 
       {balancesLoading ? (
-        <View className="mt-6 h-36 rounded-2xl bg-gray-100" />
+        <View className="mt-6 h-52 rounded-3xl bg-gray-100" />
       ) : (
-        <View className="mt-6 flex-row rounded-2xl border border-gray-200 bg-white p-7">
-          <View className="flex-1 pr-3">
-            <Text className="text-base font-medium text-gray-500">You're owed</Text>
-            <Text className="mt-2 text-2xl font-bold text-emerald-500">{money(totalOwed)}</Text>
-          </View>
-          <View className="w-px bg-gray-100" />
-          <View className="flex-1 pl-3">
-            <Text className="text-base font-medium text-gray-500">You owe</Text>
-            <Text className="mt-2 text-2xl font-bold text-red-500">{money(totalOwing)}</Text>
-          </View>
-        </View>
+        <HomeAnalytics
+          className="mt-6"
+          owed={totalOwed}
+          owing={totalOwing}
+          activeTabs={groupBalances.length}
+        />
       )}
 
       <TouchableOpacity onPress={() => navigation.navigate('GroupsList')} accessibilityLabel="Groups" className="mt-6">
