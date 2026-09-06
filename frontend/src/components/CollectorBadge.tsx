@@ -40,7 +40,7 @@ export function CollectorBadge({
   if (isPayer) {
     return (
       <span role="img" aria-label="Collector" title="Collector">
-        <Seal fill="#00a86b" stroke="#006b44" textColor="#ffffff" label="COLLECTOR" />
+        <Seal fill="#1a1a1a" stroke="#000000" textColor="#ffffff" label="COLLECTOR" />
       </span>
     )
   }
@@ -56,7 +56,7 @@ export function CollectorBadge({
       title="Set as collector"
       className="shrink-0 opacity-50 grayscale transition hover:opacity-80 hover:grayscale-0 disabled:cursor-not-allowed disabled:opacity-30"
     >
-      <Seal fill="#94a3b8" stroke="#64748b" textColor="#ffffff" label="COLLECTOR" />
+      <Seal fill="#9a968e" stroke="#6b6b6b" textColor="#ffffff" label="COLLECTOR" />
     </button>
   )
 }

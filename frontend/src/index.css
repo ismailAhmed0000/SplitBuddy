@@ -1,38 +1,92 @@
 @import "tailwindcss";
 
 @theme {
-  /* Primary / success — brand green */
-  --color-brand-50: #e6f7f0;
-  --color-brand-100: #c0ecda;
-  --color-brand-200: #96dfc0;
-  --color-brand-300: #69d2a5;
-  --color-brand-400: #34c185;
-  --color-brand-500: #00b074;
-  --color-brand-600: #00a86b;
-  --color-brand-700: #00895a;
-  --color-brand-800: #006b44;
-  --color-brand-900: #005236;
+  /* ------------------------------------------------------------------ */
+  /*  Neutral / monochrome theme                                         */
+  /*  Warm off-white ground, near-black ink, no bright accent.           */
+  /* ------------------------------------------------------------------ */
 
-  /* Secondary — deep navy/charcoal for text and dark surfaces */
-  --color-ink: #1a1a2e;
+  /* Typography — geometric grotesque, tabular-friendly */
+  --font-sans: "Hanken Grotesk", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
 
-  /* Page background — soft off-white */
-  --color-canvas: #f8f9fa;
+  /* "Primary" scale — was brand green, now a warm near-black ramp.
+     Used for primary buttons, links, positive/paid semantics. */
+  --color-brand-50: #f4f2ed;
+  --color-brand-100: #e7e4dc;
+  --color-brand-200: #cfcabf;
+  --color-brand-300: #a8a199;
+  --color-brand-400: #6f6960;
+  --color-brand-500: #2b2926;
+  --color-brand-600: #1f1d1b;
+  --color-brand-700: #171717;
+  --color-brand-800: #101010;
+  --color-brand-900: #0a0a0a;
 
-  /* Accent — buddy score highlights, alerts */
-  --color-accent: #ffb800;
-  --color-accent-600: #e6a600;
+  /* Secondary — near-black for text and dark surfaces */
+  --color-ink: #1a1a1a;
 
-  /* Error / debt — soft red */
-  --color-error-50: #fff1f1;
-  --color-error-100: #ffe1e1;
-  --color-error-200: #ffc9c9;
-  --color-error-400: #ff8080;
-  --color-error-500: #ff5c5c;
-  --color-error-600: #f53d3d;
-  --color-error-700: #d92b2b;
+  /* Page background — warm off-white / cream */
+  --color-canvas: #f2f0ea;
+
+  /* Accent — theme is monochrome; keep neutral */
+  --color-accent: #1a1a1a;
+  --color-accent-600: #101010;
+
+  /* Neutral grays — warm-shifted, override Tailwind's cool slate.
+     200 == subtle border (#e5e3dd), 500 == secondary text (#6b6b6b). */
+  --color-slate-50: #f7f5f1;
+  --color-slate-100: #f0ede7;
+  --color-slate-200: #e5e3dd;
+  --color-slate-300: #d6d3cb;
+  --color-slate-400: #9a968e;
+  --color-slate-500: #6b6b6b;
+  --color-slate-600: #57544e;
+  --color-slate-700: #3d3a35;
+  --color-slate-800: #292723;
+  --color-slate-900: #1a1a1a;
+
+  /* Error / debt — muted terracotta, not a bright red */
+  --color-error-50: #fbf1ee;
+  --color-error-100: #f4e1db;
+  --color-error-200: #e8c5b9;
+  --color-error-400: #c77c64;
+  --color-error-500: #b45c42;
+  --color-error-600: #9e4a32;
+  --color-error-700: #833a26;
+
+  /* Pending / partial — muted warm ochre, not bright yellow */
+  --color-amber-50: #f7f3ea;
+  --color-amber-100: #efe7d5;
+  --color-amber-200: #e0d2b3;
+  --color-amber-400: #c9a96b;
+  --color-amber-600: #9c7c3c;
+  --color-amber-700: #7f6531;
+  --color-amber-800: #654f27;
 }
 
 body {
   margin: 0;
+  font-family: var(--font-sans);
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Tighten display type the way premium grotesque layouts do */
+h1,
+h2,
+h3 {
+  letter-spacing: -0.02em;
+}
+
+/* Tabular, aligned figures for stats and money */
+.tabular-nums,
+[class*="text-2xl"],
+[class*="text-3xl"],
+[class*="text-4xl"],
+[class*="text-5xl"],
+[class*="text-6xl"] {
+  font-feature-settings: "tnum" 1, "ss01" 1;
 }
