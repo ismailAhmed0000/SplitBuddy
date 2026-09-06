@@ -24,9 +24,6 @@ export function BalancesCard({
   const [isMessageModalOpen, setIsMessageModalOpen] = useState(false)
   const [pendingPay, setPendingPay] = useState<TabBalance | null>(null)
 
-  const myBalance = balances.find((b) => b.group_member_id === myMemberId)
-  const canSettleUp = Boolean(payerId) && myBalance && !myBalance.is_payer && myBalance.status === 'pending'
-
   const payIsSelf = pendingPay?.group_member_id === myMemberId
   const payAmount = pendingPay ? Math.abs(pendingPay.balance) : 0
 
@@ -53,35 +50,22 @@ export function BalancesCard({
 
       <div className="mt-2">
         {balances.map((member) => {
-          const canMarkPaid =
-            !member.is_payer &&
-            member.status === 'pending' &&
-            payerId &&
-            (member.group_member_id === myMemberId || myMemberId === payerId)
+          // Anyone who still owes gets a Pay button — the collector never does.
+          const canPay = !member.is_payer && member.status === 'pending' && Boolean(payerId)
 
           return (
             <BalanceRow
               key={member.group_member_id}
               tabId={groupId}
               member={member}
-              canMarkPaid={Boolean(canMarkPaid)}
-              onMarkPaid={() => setPendingPay(member)}
+              isSelf={member.group_member_id === myMemberId}
+              canPay={canPay}
+              onPay={() => setPendingPay(member)}
               pending={createSettlement.isPending}
             />
           )
         })}
       </div>
-
-      {canSettleUp && myBalance && (
-        <button
-          type="button"
-          onClick={() => setPendingPay(myBalance)}
-          disabled={createSettlement.isPending}
-          className="mt-4 w-full rounded-xl bg-brand-600 py-3 text-sm font-bold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {createSettlement.isPending ? 'Settling up…' : 'Settle up'}
-        </button>
-      )}
 
       {settlements && settlements.length > 0 && (
         <div className="mt-4 border-t border-slate-100 pt-3">

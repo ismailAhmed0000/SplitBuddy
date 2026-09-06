@@ -6,14 +6,16 @@ import type { TabBalance } from '@/lib/tabs'
 export function BalanceRow({
   tabId,
   member,
-  canMarkPaid,
-  onMarkPaid,
+  isSelf,
+  canPay,
+  onPay,
   pending,
 }: {
   tabId: number
   member: TabBalance
-  canMarkPaid: boolean
-  onMarkPaid: () => void
+  isSelf: boolean
+  canPay: boolean
+  onPay: () => void
   pending: boolean
 }) {
   const isPaidOff = !member.is_payer && member.status === 'paid'
@@ -53,14 +55,14 @@ export function BalanceRow({
           </span>
         )}
 
-        {!member.is_payer && !isPaidOff && canMarkPaid && (
+        {!member.is_payer && !isPaidOff && canPay && (
           <button
             type="button"
-            onClick={onMarkPaid}
+            onClick={onPay}
             disabled={pending}
-            className="rounded-full border border-slate-300 px-2.5 py-0.5 text-[10px] font-bold tracking-wide text-slate-500 uppercase transition hover:border-brand-400 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-full bg-brand-600 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Mark paid
+            {isSelf ? 'Pay' : 'Mark paid'}
           </button>
         )}
       </div>
