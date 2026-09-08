@@ -41,10 +41,15 @@ class BalanceService
             ->get();
 
         foreach ($bills as $bill) {
-            $payer = $members->firstWhere('user_id', $bill->uploaded_by);
+            // The collector fronts the money and is who everyone settles up
+            // to, so the bill is credited to them — not to whoever happened
+            // to upload the receipt. Fall back to the uploader only when the
+            // tab has no collector set.
+            $payer = ($group->payer_id ? $members->firstWhere('id', $group->payer_id) : null)
+                ?? $members->firstWhere('user_id', $bill->uploaded_by);
 
-            // A bill whose uploader isn't a member of this group can't be
-            // credited to anyone, so it's excluded from the ledger.
+            // A bill we can't credit to any current member can't go on the
+            // ledger, so it's excluded.
             if (! $payer) {
                 continue;
             }
